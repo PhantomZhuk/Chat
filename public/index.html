@@ -4,12 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Chat</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js'
+        integrity='sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw=='
+        crossorigin='anonymous'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.js'
+        integrity='sha512-luUnkeG+uabiT2pZdi5ME5uADvq+FpDs2fK5V0nVXrHCND9F077fKaE9W//oJvGnWSmwQmCau63A6s3um1NZmg=='
+        crossorigin='anonymous'></script>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.css'
+        integrity='sha512-8BU3emz11z9iF75b10oPjjpamM4Mz23yQFQymbtwyPN3mNWHxpgeqyrYnkIUP6A8KyAj5k2p3MiYLtYqew7gIw=='
+        crossorigin='anonymous' />
+    <link
+        href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,regular,500,600,700,800,900,100italic,200italic,300italic,italic,500italic,600italic,700italic,800italic,900italic"
+        rel="stylesheet" />
 </head>
 
 <body>
     <div class="wrap">
-        
+        <header>
+            <div class="menuBtnContainer">
+                <i class="fa-solid fa-bars" id="OpenMenuBtn"></i>
+            </div>
+            <div class="mainChatContainer">
+                <div class="mainChat">
+                    <p>Main</p>
+                </div>
+                <div class="chatContainer">
+
+                </div>
+                <div class="addChatBtn">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="header">
+                <div class="mainInfoChat">
+                    <div class="nameChat">Main caht</div>
+                    <div class="usersOnline">Online 1</div>
+                </div>
+            </div>
+            <div class="messageContainer">
+
+            </div>
+            <div class="sendMessageContainer">
+                <input type="text" id="sendMessageInput" placeholder="Enter message..." autocomplete="off">
+                <div id="OpenEmojiContainerBtn"><i class="fa-solid fa-face-smile"></i></div>
+                <button id="sendMessageBtn"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </main>
     </div>
 
     <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js'
