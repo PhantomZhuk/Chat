@@ -18,12 +18,41 @@
     <link
         href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,regular,500,600,700,800,900,100italic,200italic,300italic,italic,500italic,600italic,700italic,800italic,900italic"
         rel="stylesheet" />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js'
+        integrity='sha512-aUhL2xOCrpLEuGD5f6tgHbLYEXRpYZ8G5yD+WlFrXrPy2IrWBlu6bih5C9H6qGsgqnU6mgx6KtU8TreHpASprw=='
+        crossorigin='anonymous'></script>
 </head>
 
 <body>
 
     <div class="wrap">
-
+        <div class="authForm">
+            <div class="loginForm">
+                <div class="header">
+                    <h2>Login</h2>
+                </div>
+                <div class="inputContainer">
+                    <input type="text" id="loginInput" placeholder="Enter login..." autocomplete="off">
+                    <input type="password" id="passwordInput" placeholder="Enter password..." autocomplete="off">
+                </div>
+                <div class="btnContainer">
+                    <button id="loginBtn">Sing in</button>
+                </div>
+            </div>
+            <div class="registerForm">
+                <div class="header">
+                    <h2>Register</h2>
+                </div>
+                <div class="inputContainer">
+                    <input type="text" id="registerInput" placeholder="Enter login..." autocomplete="off">
+                    <input type="password" id="registerPasswordInput" placeholder="Enter password..."
+                        autocomplete="off">
+                </div>
+                <div class="btnContainer">
+                    <button id="registerBtn">Sing up</button>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="./main.js"></script>
 </body>

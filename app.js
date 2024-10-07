@@ -12,8 +12,8 @@ app.get('/chats', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/aus', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', `aus`, 'index.html'));
+app.get('/auth', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', `auth`, 'index.html'));
 });
 
 let connectionUsers = 0;
