@@ -95,11 +95,28 @@
   height: 80vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   overflow: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
   padding: 20px;
+}
+.wrap main .messageContainer .myMessage {
+  padding: 10px 20px;
+  background-color: #49869f;
+  border-radius: 10px;
+  margin: 10px;
+  color: #fff;
+  font-size: 16px;
+}
+.wrap main .messageContainer .otherMessage {
+  padding: 10px 20px;
+  background-color: #8a8a8a;
+  border-radius: 10px;
+  margin: 10px;
+  color: #fff;
+  font-size: 16px;
+  align-self: flex-start;
 }
 .wrap main .sendMessageContainer {
   width: 100%;
@@ -108,7 +125,7 @@
   justify-content: space-between;
   align-items: center;
   background-color: #e8e8e8;
-  padding: 0 20px;
+  padding: 0 10px 0 20px;
   color: #fff;
 }
 .wrap main .sendMessageContainer input {
@@ -132,6 +149,7 @@
   cursor: pointer;
   border-radius: 10px;
   font-size: 16px;
+  margin: 5px;
 }
 .wrap main .sendMessageContainer button {
   width: 50px;
@@ -146,4 +164,5 @@
   cursor: pointer;
   border-radius: 10px;
   font-size: 16px;
+  margin: 5px;
 }/*# sourceMappingURL=style.css.map */

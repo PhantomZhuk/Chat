@@ -1,24 +1,26 @@
 const socket = io();
-
-const form = document.getElementById('form');
-const input = document.getElementById('input');
-
-form.addEventListener('submit', (e) => {
+$('.sendMessageContainer').on('submit', (e) => {
     e.preventDefault();
-    if (input.value) {
-        socket.emit('chat message', input.value);
-        input.value = '';
+    if ($('#sendMessageInput').val()) {
+        socket.emit('chat message', $('#sendMessageInput').val());
+        $('#sendMessageInput').val('');
     }
 });
 
-socket.on('chat message', (msg) => {
-    const item = document.createElement('li');
-    item.textContent = msg;
-    document.getElementById('messages').appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
+socket.on('My message', (msg) => {
+    $('.messageContainer').append(`
+        <div class="myMessage">${msg}</div>
+    `);
+    $(window).scrollTop($(document).height());
+});
+
+socket.on ('Other message', (msg) => {
+    $('.messageContainer').append(`
+        <div class="otherMessage">${msg}</div>
+    `);
+    $(window).scrollTop($(document).height());
 });
 
 socket.on('connectionUsers', (connectionUsers) => {
-    const users = document.querySelector('.users');
-    users.innerHTML = connectionUsers;
+    $(`.usersOnline`).text(`Online ${connectionUsers}`);
 });
