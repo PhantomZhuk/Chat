@@ -16,8 +16,42 @@
   width: 400px;
   height: 400px;
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+.wrap .authForm .btnAuth {
+  width: 100%;
+  height: 20%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wrap .authForm .btnAuth #openLoginBtn,
+.wrap .authForm .btnAuth #openRegisterBtn {
+  width: 50%;
+  height: 100%;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
   justify-content: center;
   align-items: center;
+}
+.wrap .authForm .btnAuth #openLoginBtn {
+  border-radius: 10px 0 0 0;
+}
+.wrap .authForm .btnAuth #openRegisterBtn {
+  border-radius: 0 10px 0 0;
+}
+.wrap .authForm .btnAuth .active {
+  background-color: #376679;
+  box-shadow: 0 0 10px #376679;
+}
+.wrap .authForm .btnAuth .notActive {
+  background-color: #2d5464;
+  box-shadow: 0 0 10px #2d5464;
 }
 .wrap .authForm .loginForm {
   display: flex;
@@ -26,28 +60,18 @@
 .wrap .authForm .registerForm {
   width: 100%;
   height: 100%;
-  padding: 50px 0;
+  padding: 20px 0;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   background-color: #376679;
-  border-radius: 10px;
   box-shadow: 0 0 10px #376679;
-}
-.wrap .authForm .loginForm .header,
-.wrap .authForm .registerForm .header {
-  width: 100%;
-  height: 10%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 24px;
-  color: #fff;
+  border-radius: 0 0 10px 10px;
 }
 .wrap .authForm .loginForm .inputContainer,
 .wrap .authForm .registerForm .inputContainer {
   width: 100%;
-  height: 50%;
+  height: 70%;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
