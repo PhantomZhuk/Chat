@@ -40,7 +40,7 @@ $(document).ready(() => {
                                             const newUser = res.data.find(el => el.login === login && el.password === password);
 
                                             if (newUser) {
-                                                userToken = $.cookie('userToken', User._id, { path: '/' }, { expires: 7 });
+                                                userToken = $.cookie('userToken', newUser._id, { path: '/' }, { expires: 7 });
                                                 window.location.href = '/chats';
                                                 $('#registerInput').val(``);
                                                 $('#registerPasswordInput').val(``);

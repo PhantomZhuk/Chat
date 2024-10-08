@@ -87,10 +87,10 @@ io.on('connection', (socket) => {
     connectionUsers++;
     io.emit('connectionUsers', connectionUsers);
 
-    socket.on('chat message', (msg) => {
-        socket.emit('My message', msg);
-
-        socket.broadcast.emit('Other message', msg);
+    socket.on('chat message', (data) => {
+        const { message, userId } = data;
+        socket.emit('My message', { message, userId });
+        socket.broadcast.emit('Other message', { message, userId });
     });
 
     socket.on('disconnect', () => {

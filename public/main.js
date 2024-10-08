@@ -1,38 +1,62 @@
 const socket = io();
+let userId = $.cookie('userToken');
+let nameUser;
+
+authorisationCheck(userId);
+
 $('.sendMessageContainer').on('submit', (e) => {
     e.preventDefault();
-    if ($('#sendMessageInput').val()) {
-        socket.emit('chat message', $('#sendMessageInput').val());
+    const message = $('#sendMessageInput').val();
+    if (message) {
+        socket.emit('chat message', { message, userId });
         $('#sendMessageInput').val('');
     }
 });
 
-socket.on('My message', (msg) => {
-    $('.messageContainer').append(`
-        <div class="myMessage">${msg}</div>
-    `);
-    $(window).scrollTop($(document).height());
+socket.on('My message', (data) => {
+    appendMessage('myMessage', nameUser, data.message);
 });
 
-socket.on ('Other message', (msg) => {
-    $('.messageContainer').append(`
-        <div class="otherMessage">${msg}</div>
-    `);
-    $(window).scrollTop($(document).height());
+socket.on('Other message', (data) => {
+    getUserNameById(data.userId, (userName) => {
+        appendMessage('otherMessage', userName, data.message);
+    });
 });
 
 socket.on('connectionUsers', (connectionUsers) => {
     $(`.usersOnline`).text(`Online ${connectionUsers}`);
 });
 
-function authorisationCheck (){
+function authorisationCheck(id) {
     axios.get('/allUsers')
         .then((res) => {
-            const user = res.data.find(el => el._id === $.cookie('userToken'));
+            const user = res.data.find(el => el._id === id);
             if (!user) {
                 window.location.href = '/auth';
+            } else {
+                nameUser = user.login;
             }
-        })
+        });
 }
 
-authorisationCheck();
+function getUserNameById(id, callback) {
+    axios.get('/allUsers')
+        .then((res) => {
+            const user = res.data.find(el => el._id === id);
+            if (user) {
+                callback(user.login);
+            } else {
+                callback('Unknown');
+            }
+        })
+        .catch(() => callback('Unknown'));
+}
+
+function appendMessage(type, userName, message) {
+    $('.messageContainer').append( `
+        <div class="${type}">
+            <div class="nameUser">${userName}</div>
+            <div class="message">${message}</div>
+        </div>
+    `);
+}

@@ -118,6 +118,14 @@
                 margin: 10px;
                 color: #fff;
                 font-size: 16px;
+                display: flex;
+                flex-direction: column;
+
+                .nameUser {
+                    font-weight: 700;
+                    font-size: 18px;
+                    align-self: flex-end;
+                }
             }
 
             .otherMessage {
@@ -128,6 +136,12 @@
                 color: #fff;
                 font-size: 16px;
                 align-self: flex-start;
+
+                .nameUser {
+                    font-weight: 700;
+                    font-size: 18px;
+                    align-self: flex-end;
+                }
             }
         }
 
