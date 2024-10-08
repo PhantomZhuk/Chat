@@ -24,3 +24,15 @@ socket.on ('Other message', (msg) => {
 socket.on('connectionUsers', (connectionUsers) => {
     $(`.usersOnline`).text(`Online ${connectionUsers}`);
 });
+
+function authorisationCheck (){
+    axios.get('/allUsers')
+        .then((res) => {
+            const user = res.data.find(el => el._id === $.cookie('userToken'));
+            if (!user) {
+                window.location.href = '/auth';
+            }
+        })
+}
+
+authorisationCheck();

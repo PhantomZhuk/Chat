@@ -40,7 +40,7 @@ $(document).ready(() => {
                                             const newUser = res.data.find(el => el.login === login && el.password === password);
 
                                             if (newUser) {
-                                                userToken = $.cookie('userToken', newUser._id, { path: '/' });
+                                                userToken = $.cookie('userToken', User._id, { path: '/' }, { expires: 7 });
                                                 window.location.href = '/chats';
                                                 $('#registerInput').val(``);
                                                 $('#registerPasswordInput').val(``);
@@ -73,10 +73,24 @@ $(document).ready(() => {
     $('#loginBtn').on('click', () => {
         axios.post(`/auth/login`, { login: $('#loginInput').val(), password: $('#passwordInput').val() })
             .then(() => {
-                console.log('User logged in');
-                window.location.href = '/chats';
-                $('#registerInput').val(``);
-                $('#registerPasswordInput').val(``);
+                axios.get('/allUsers')
+                    .then((res) => {
+                        const login = $('#loginInput').val();
+                        const password = $('#passwordInput').val();
+                        const User = res.data.find(el => el.login === login && el.password === password);
+
+                        if (User) {
+                            userToken = $.cookie('userToken', User._id, { path: '/' }, { expires: 7 });
+                            window.location.href = '/chats';
+                            $('#loginInput').val(``);
+                            $('#passwordInput').val(``);
+                        } else {
+                            console.log('User not found');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error getting users:', error);
+                    });
             })
     })
 })
