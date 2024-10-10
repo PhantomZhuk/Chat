@@ -5,6 +5,21 @@
   font-family: "Montserrat";
 }
 
+.notificationContainer {
+  width: 300px;
+  height: 75px;
+  background-color: #48869f;
+  border-radius: 10px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 20px;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}
+
 .wrap {
   width: 100%;
   min-height: 100vh;
@@ -96,6 +111,12 @@
 .wrap .authForm .loginForm .inputContainer input::placeholder,
 .wrap .authForm .registerForm .inputContainer input::placeholder {
   color: #fff;
+}
+.wrap .authForm .loginForm .inputContainer .notification,
+.wrap .authForm .registerForm .inputContainer .notification {
+  width: 80%;
+  color: #fff;
+  display: none;
 }
 .wrap .authForm .loginForm .btnContainer,
 .wrap .authForm .registerForm .btnContainer {

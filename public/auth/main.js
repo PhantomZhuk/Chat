@@ -6,6 +6,7 @@ $(document).ready(() => {
         $(`#openLoginBtn`).removeClass('notActive');
         $(`#openRegisterBtn`).removeClass('active');
         $(`#openRegisterBtn`).addClass('notActive');
+        $(`.notification`).text(``);
     })
     $('#openRegisterBtn').on('click', () => {
         $('.loginForm').css('display', 'none');
@@ -14,6 +15,7 @@ $(document).ready(() => {
         $(`#openLoginBtn`).addClass('notActive');
         $(`#openRegisterBtn`).addClass('active');
         $(`#openRegisterBtn`).removeClass('notActive');
+        $(`.notification`).text(``);
     })
 
     let userToken = $.cookie('userToken') || '';
@@ -30,6 +32,8 @@ $(document).ready(() => {
                 axios.get('/allUsers')
                     .then((res) => {
                         const existingUser = res.data.find(el => el.login === login);
+                        $(`.notification`).css('display', 'none');
+                        $(`.notification`).text(``);
 
                         if (!existingUser) {
                             axios.post('/auth/createUser', { login, password })
@@ -45,7 +49,12 @@ $(document).ready(() => {
                                                 $('#registerInput').val(``);
                                                 $('#registerPasswordInput').val(``);
                                             } else {
-                                                alert('User not found');
+                                                $(`.notificationContainer`).css('display', 'flex');
+                                                $(`.notificationText`).text(`User not found`);
+                                                setTimeout(() => {
+                                                    $(`.notificationContainer`).css('display', 'none');
+                                                    $(`.notificationText`).text(``);
+                                                }, 3000)
                                             }
                                         })
                                         .catch((error) => {
@@ -56,17 +65,28 @@ $(document).ready(() => {
                                     console.error('Error creating user:', error);
                                 });
                         } else {
-                            console.log('User already exists');
+                            $(`.notificationContainer`).css('display', 'flex');
+                            $(`.notificationText`).text(`User already exists`);
+                            setTimeout(() => {
+                                $(`.notificationContainer`).css('display', 'none');
+                                $(`.notificationText`).text(``);
+                            }, 3000)
                         }
                     })
                     .catch((error) => {
                         console.error('Error getting users:', error);
                     });
             } else {
-                console.log('Incorrect password');
+                $(`.notificationPassword`).css('display', 'flex');
+                $(`.notificationPassword`).text(`Incorrect password it must contain at least 8 characters and at least 1 letter and 1 number`);
+                $(`.notificationLogin`).css('display', 'none');
+                $(`.notificationLogin`).text(``);
             }
         } else {
-            console.log('Incorrect login');
+            $(`.notificationLogin`).css('display', 'flex');
+            $(`.notificationLogin`).text(`Incorrect login, it must contain at least 3 characters`);
+            $(`.notificationPassword`).css('display', 'none');
+            $(`.notificationPassword`).text(``);
         }
     });
 
@@ -85,7 +105,12 @@ $(document).ready(() => {
                             $('#loginInput').val(``);
                             $('#passwordInput').val(``);
                         } else {
-                            console.log('User not found');
+                            $(`.notificationContainer`).css('display', 'flex');
+                            $(`.notificationText`).text(`User not found`);
+                            setTimeout(() => {
+                                $(`.notificationContainer`).css('display', 'none');
+                                $(`.notificationText`).text(``);
+                            }, 3000)
                         }
                     })
                     .catch((error) => {

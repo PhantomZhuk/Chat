@@ -25,6 +25,10 @@
 
 <body>
 
+    <div class="notificationContainer">
+        <div class="notificationText">User not found</div>
+    </div>
+
     <div class="wrap">
         <div class="authForm">
             <div class="btnAuth">
@@ -34,7 +38,9 @@
             <div class="loginForm">
                 <div class="inputContainer">
                     <input type="text" id="loginInput" placeholder="Enter login..." autocomplete="off">
+                    <div class="notificationLogin notification"></div>
                     <input type="password" id="passwordInput" placeholder="Enter password..." autocomplete="off">
+                    <div class="notificationPassword notification"></div>
                 </div>
                 <div class="btnContainer">
                     <button id="loginBtn">Sing in</button>
@@ -43,8 +49,10 @@
             <div class="registerForm">
                 <div class="inputContainer">
                     <input type="text" id="registerInput" placeholder="Enter login..." autocomplete="off">
+                    <div class="notificationLogin notification"></div>
                     <input type="password" id="registerPasswordInput" placeholder="Enter password..."
                         autocomplete="off">
+                    <div class="notificationPassword notification"></div>
                 </div>
                 <div class="btnContainer">
                     <button id="registerBtn">Sing up</button>
