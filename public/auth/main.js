@@ -49,12 +49,7 @@ $(document).ready(() => {
                                                 $('#registerInput').val(``);
                                                 $('#registerPasswordInput').val(``);
                                             } else {
-                                                $(`.notificationContainer`).css('display', 'flex');
-                                                $(`.notificationText`).text(`User not found`);
-                                                setTimeout(() => {
-                                                    $(`.notificationContainer`).css('display', 'none');
-                                                    $(`.notificationText`).text(``);
-                                                }, 3000)
+                                                showNotification(`User not found`);
                                             }
                                         })
                                         .catch((error) => {
@@ -65,12 +60,7 @@ $(document).ready(() => {
                                     console.error('Error creating user:', error);
                                 });
                         } else {
-                            $(`.notificationContainer`).css('display', 'flex');
-                            $(`.notificationText`).text(`User already exists`);
-                            setTimeout(() => {
-                                $(`.notificationContainer`).css('display', 'none');
-                                $(`.notificationText`).text(``);
-                            }, 3000)
+                            showNotification(`User already exists`);
                         }
                     })
                     .catch((error) => {
@@ -105,17 +95,24 @@ $(document).ready(() => {
                             $('#loginInput').val(``);
                             $('#passwordInput').val(``);
                         } else {
-                            $(`.notificationContainer`).css('display', 'flex');
-                            $(`.notificationText`).text(`User not found`);
-                            setTimeout(() => {
-                                $(`.notificationContainer`).css('display', 'none');
-                                $(`.notificationText`).text(``);
-                            }, 3000)
+                            showNotification(`User not found`);
                         }
                     })
                     .catch((error) => {
-                        console.error('Error getting users:', error);
+                        showNotification(`User not found`);
                     });
             })
+            .catch((error) => {
+                showNotification(`User not found`);
+            });
     })
+
+    function showNotification(message) {
+        $(`.notificationContainer`).css('display', 'flex');
+        $(`.notificationText`).text(message);
+        setTimeout(() => {
+            $(`.notificationContainer`).css('display', 'none');
+            $(`.notificationText`).text(``);
+        }, 3000);
+    }
 })

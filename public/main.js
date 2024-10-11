@@ -15,11 +15,17 @@ $('.sendMessageContainer').on('submit', (e) => {
 
 socket.on('My message', (data) => {
     appendMessage('myMessage', nameUser, data.message);
+    $('.messageContainer').animate({
+        scrollTop: $('.messageContainer').prop('scrollHeight')
+    }, 'slow');
 });
 
 socket.on('Other message', (data) => {
     getUserNameById(data.userId, (userName) => {
         appendMessage('otherMessage', userName, data.message);
+        $('.messageContainer').animate({
+            scrollTop: $('.messageContainer').prop('scrollHeight')
+        }, 'slow');
     });
 });
 
