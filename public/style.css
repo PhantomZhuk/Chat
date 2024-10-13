@@ -18,6 +18,7 @@
   color: #fff;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   padding: 20px 0;
 }
@@ -26,8 +27,66 @@
   margin: 10px;
   display: flex;
   justify-content: center;
-  cursor: pointer;
+  align-items: center;
   font-size: 24px;
+}
+.wrap header .menuBtnContainer #MenuBtn {
+  cursor: pointer;
+}
+.wrap header .menuBtnContainer .accountContainer {
+  width: 80%;
+  display: none;
+  align-items: center;
+  cursor: pointer;
+}
+.wrap header .menuBtnContainer .accountContainer .accountIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+  background-color: #376679;
+}
+.wrap header .menuBtnContainer .accountContainer .accountName {
+  font-size: 18px;
+}
+.wrap header .searchContainer {
+  width: 100%;
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 15px;
+}
+.wrap header .searchContainer #searchInput {
+  display: none;
+  width: 80%;
+  height: 40px;
+  border: none;
+  outline: none;
+  background-color: #49869f;
+  border-radius: 10px;
+  padding: 0 10px;
+  color: #fff;
+  font-size: 18px;
+}
+.wrap header .searchContainer #searchInput::-moz-placeholder {
+  color: #fff;
+}
+.wrap header .searchContainer #searchInput::placeholder {
+  color: #fff;
+}
+.wrap header .searchContainer #searchBtn {
+  width: 65px;
+  height: 65px;
+  border: none;
+  outline: none;
+  background-color: #49869f;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 18px;
 }
 .wrap header .mainChatContainer {
   width: 100%;
@@ -36,21 +95,33 @@
   align-items: center;
 }
 .wrap header .mainChatContainer .mainChat {
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  border-radius: 10px;
+}
+.wrap header .mainChatContainer .mainChat .mainChatIcon {
   width: 65px;
   height: 65px;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: #376679;
-  margin: 10px;
   border-radius: 10px;
   cursor: pointer;
+}
+.wrap header .mainChatContainer .mainChat .mainChatName {
+  display: none;
+  margin-top: 20px;
 }
 .wrap header .mainChatContainer .chatContainer {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 .wrap header .mainChatContainer .addChatBtn {
   width: 65px;
@@ -62,6 +133,46 @@
   margin: 10px;
   border-radius: 10px;
   cursor: pointer;
+}
+.wrap header .settingBtn {
+  width: 100%;
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto;
+  cursor: pointer;
+}
+.wrap header .settingBtn .custom-loader {
+  width: 45px;
+  height: 45px;
+  display: grid;
+  color: #fff;
+  background: radial-gradient(farthest-side, currentColor calc(100% - 6px), rgba(0, 0, 0, 0) calc(100% - 5px) 0);
+  -webkit-mask: radial-gradient(farthest-side, rgba(0, 0, 0, 0) calc(100% - 13px), #000 calc(100% - 12px));
+  border-radius: 50%;
+  animation: s9 2s infinite linear;
+}
+.wrap header .settingBtn .custom-loader::before,
+.wrap header .settingBtn .custom-loader::after {
+  content: "";
+  grid-area: 1/1;
+  background: linear-gradient(currentColor 0 0) center, linear-gradient(currentColor 0 0) center;
+  background-size: 100% 10px, 10px 100%;
+  background-repeat: no-repeat;
+}
+.wrap header .settingBtn .custom-loader::after {
+  transform: rotate(45deg);
+}
+@keyframes s9 {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+.wrap header .settingBtn .settingsText {
+  margin: 10px;
+  font-size: 18px;
+  display: none;
 }
 .wrap main {
   width: calc(100% - 100px);

@@ -27,16 +27,29 @@
     <div class="wrap">
         <header>
             <div class="menuBtnContainer">
-                <i class="fa-solid fa-bars" id="OpenMenuBtn"></i>
+                <div class="accountContainer">
+                    <div class="accountIcon"></div>
+                    <div class="accountName">User</div>
+                </div>
+                <i class="fa-solid fa-bars" id="MenuBtn"></i>
+            </div>
+            <div class="searchContainer">
+                <input type="text" id="searchInput" placeholder="Search...">
+                <i class="fa-solid fa-magnifying-glass openMenu" id="searchBtn"></i>
             </div>
             <div class="mainChatContainer">
                 <div class="mainChat">
-                    <p>Main</p>
+                    <p class="mainChatIcon">Main</p>
+                    <p class="mainChatName">Main</p>
                 </div>
                 <div class="chatContainer"></div>
                 <div class="addChatBtn">
                     <i class="fa-solid fa-plus"></i>
                 </div>
+            </div>
+            <div class="settingBtn">
+                <div class="custom-loader"></div>
+                <p class="settingsText">Settings</p>
             </div>
         </header>
         <main>
@@ -49,7 +62,6 @@
             <div class="messageContainer"></div>
             <form action="" class="sendMessageContainer">
                 <input type="text" id="sendMessageInput" placeholder="Enter message..." autocomplete="off">
-                <div id="OpenEmojiContainerBtn"><i class="fa-solid fa-face-smile"></i></div>
                 <button id="sendMessageBtn"><i class="fa-solid fa-paper-plane"></i></button>
             </form>
         </main>
