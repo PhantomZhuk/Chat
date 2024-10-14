@@ -139,3 +139,37 @@ $(`#searchBtn`).click(() => {
         console.log(`Search button clicked`);
     }
 });
+
+$(`.accountContainer`).click(()=>{
+    $(`.profileContainer`).css(`display`, `flex`);
+    $(`.wrap`).css(`filter`, `brightness(0.7)`);
+});
+
+$(`.closeProfileBtn`).click(()=>{
+    $(`.profileContainer`).css(`display`, `none`);
+    $(`.wrap`).css(`filter`, `brightness(1)`);
+})
+
+$(`.openChangeNameContainer`).click(()=>{
+    $(`.changeNameContainer`).css(`display`, `flex`);
+    $(`.profileContainer`).css(`display`, `none`);
+    $(`.wrap`).css(`filter`, `brightness(0.7)`);
+})
+
+$(`#cancelNameBtn`).click(()=>{
+    $(`.changeNameContainer`).css(`display`, `none`);
+    $(`.profileContainer`).css(`display`, `flex`);
+    $(`.wrap`).css(`filter`, `brightness(1)`);
+})
+
+$(`.openChangeProfileImg`).click(()=>{
+    $(`.changeProfileImgContainer`).css(`display`, `flex`);
+    $(`.profileContainer`).css(`display`, `none`);
+    $(`.wrap`).css(`filter`, `brightness(0.7)`);
+})
+
+$(`.closeImgBtn`).click(()=>{
+    $(`.changeProfileImgContainer`).css(`display`, `none`);
+    $(`.profileContainer`).css(`display`, `flex`);
+    $(`.wrap`).css(`filter`, `brightness(1)`);
+})

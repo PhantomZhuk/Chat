@@ -5,6 +5,214 @@
   font-family: "Montserrat";
 }
 
+.profileContainer {
+  position: absolute;
+  width: 350px;
+  height: 400px;
+  background-color: #376679;
+  border-radius: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 7;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+.profileContainer .profileHeader {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 20px;
+  color: #fff;
+}
+.profileContainer .profileHeader i {
+  font-size: 24px;
+  cursor: pointer;
+}
+.profileContainer .profileImgContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+}
+.profileContainer .profileImgContainer .profileImg {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #fff;
+}
+.profileContainer .profileImgContainer .openChangeProfileImg {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: none;
+  outline: none;
+  background-color: #264653;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  border-radius: 50%;
+  margin-top: 100px;
+  margin-left: 100px;
+}
+.profileContainer .profileNameContainer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 50px;
+  font-size: 22px;
+  color: #fff;
+}
+.profileContainer .profileNameContainer .name {
+  display: flex;
+  align-items: center;
+}
+.profileContainer .profileNameContainer .name i {
+  margin-right: 5px;
+}
+.profileContainer .profileNameContainer .profileName {
+  margin: 10px;
+  color: #73d6ff;
+  font-weight: 600;
+}
+.profileContainer .openChangeNameContainer {
+  cursor: pointer;
+}
+.profileContainer .btnContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.profileContainer .btnContainer button {
+  width: 150px;
+  height: 40px;
+  border: none;
+  outline: none;
+  background-color: #990000;
+  color: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 10px;
+  margin: 10px 0;
+  font-weight: 500;
+}
+.profileContainer .btnContainer button:hover {
+  background-color: #ff0000;
+}
+
+.changeNameContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  height: 200px;
+  background-color: #376679;
+  border-radius: 10px;
+  z-index: 8;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+.changeNameContainer .title {
+  color: #fff;
+  font-size: 22px;
+}
+.changeNameContainer .changeNameInput {
+  width: 85%;
+  height: 40px;
+  border: none;
+  border-bottom: 3px solid #ffffff;
+  outline: none;
+  background-color: #376679;
+  color: #fff;
+  font-size: 16px;
+}
+.changeNameContainer .changeNameInput::-moz-placeholder {
+  color: #fff;
+}
+.changeNameContainer .changeNameInput::placeholder {
+  color: #fff;
+}
+.changeNameContainer .btnContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 10px;
+}
+.changeNameContainer .btnContainer button {
+  width: 100px;
+  height: 40px;
+  border: none;
+  outline: none;
+  background-color: #264653;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 10px;
+  margin: 0 10px;
+}
+
+.changeProfileImgContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  height: 200px;
+  background-color: #376679;
+  border-radius: 10px;
+  z-index: 9;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+.changeProfileImgContainer .title {
+  width: 90%;
+  color: #fff;
+  font-size: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.changeProfileImgContainer .title .closeImgBtn {
+  cursor: pointer;
+}
+.changeProfileImgContainer .changeProfileImg {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.changeProfileImgContainer .changeProfileImg #changeProfileImgInput {
+  display: none;
+}
+.changeProfileImgContainer .changeProfileImg .selectFile {
+  width: 85%;
+  height: 100px;
+  background-color: #376679;
+  color: #fff;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 2px dashed #fff;
+  padding: 20px;
+}
+
 .wrap {
   width: 100%;
   min-height: 100vh;

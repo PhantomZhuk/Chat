@@ -24,6 +24,49 @@
 </head>
 
 <body>
+
+    <div class="profileContainer">
+        <div class="profileHeader">
+            <i class="fa-solid fa-xmark closeProfileBtn"></i>
+        </div>
+        <div class="profileImgContainer">
+            <div class="profileImg"></div>
+            <div class="openChangeProfileImg"><i class="fa-solid fa-camera"></i></div>
+        </div>
+        <div class="profileNameContainer">
+            <div class="name">
+                <i class="fa-regular fa-circle-user"></i>
+                <p>Name</p>
+            </div>
+            <div class="profileName openChangeNameContainer">User</div>
+        </div>
+        <div class="btnContainer">
+            <button class="profileBtn">Sign out</button>
+        </div>
+    </div>
+
+    <div class="changeNameContainer">
+        <div class="title">
+            Change name
+        </div>
+        <input type="text" class="changeNameInput" id="changeNameInput" placeholder="Enter new name...">
+        <div class="btnContainer">
+            <button id="cancelNameBtn">Cancel</button>
+            <button id="changeNameBtn">Change</button>
+        </div>
+    </div>
+
+    <div class="changeProfileImgContainer">
+        <div class="title">
+            Change profile image
+            <i class="fa-solid fa-xmark closeImgBtn"></i>
+        </div>
+        <div class="changeProfileImg">
+            <input type="file" id="changeProfileImgInput">
+            <div class="selectFile drag-and-drop">Drag and drop your file here or click to select</div>
+        </div>
+    </div>
+
     <div class="wrap">
         <header>
             <div class="menuBtnContainer">
