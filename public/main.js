@@ -14,19 +14,45 @@ $('.sendMessageContainer').on('submit', (e) => {
 });
 
 socket.on('My message', (data) => {
-    appendMessage('myMessage', nameUser, data.message);
-    $('.messageContainer').animate({
-        scrollTop: $('.messageContainer').prop('scrollHeight')
-    }, 'slow');
+    axios.get(`/allUsers`)
+        .then((res) => {
+            const user = res.data.find(el => el._id === userId);
+            if (user) {
+                const originalPath = user.path;
+                const transformedPath = originalPath
+                    .replace('public\\', './')
+                    .replace(/\\/g, '/');
+                appendMessage('myMessage', nameUser, data.message, transformedPath);
+                $('.messageContainer').animate({
+                    scrollTop: $('.messageContainer').prop('scrollHeight')
+                }, 'slow');
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
 socket.on('Other message', (data) => {
-    getUserNameById(data.userId, (userName) => {
-        appendMessage('otherMessage', userName, data.message);
-        $('.messageContainer').animate({
-            scrollTop: $('.messageContainer').prop('scrollHeight')
-        }, 'slow');
-    });
+    axios.get(`/allUsers`)
+        .then((res) => {
+            const user = res.data.find(el => el._id === data.userId);
+            if (user) {
+                const originalPath = user.path;
+                const transformedPath = originalPath
+                    .replace('public\\', './')
+                    .replace(/\\/g, '/');
+                getUserNameById(data.userId, (userName) => {
+                    appendMessage('otherMessage', userName, data.message, transformedPath);
+                    $('.messageContainer').animate({
+                        scrollTop: $('.messageContainer').prop('scrollHeight')
+                    }, 'slow');
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
 socket.on('connectionUsers', (connectionUsers) => {
@@ -58,11 +84,16 @@ function getUserNameById(id, callback) {
         .catch(() => callback('Unknown'));
 }
 
-function appendMessage(type, userName, message) {
+function appendMessage(type, userName, message, photoUrl) {
     $('.messageContainer').append(`
         <div class="${type}">
-            <div class="nameUser">${userName}</div>
-            <div class="message">${message}</div>
+            <div class="iconContainer">
+                <div class="icon" style="background-image: url('${photoUrl}');"></div>
+            </div>
+            <div class="nameContainer">
+                <div class="nameUser">${userName}</div>
+                <div class="message">${message}</div>
+            </div>
         </div>
     `);
 }
@@ -223,8 +254,8 @@ function showProfile(userId) {
             if (user) {
                 const originalPath = user.path;
                 const transformedPath = originalPath
-                    .replace('public\\', './') 
-                    .replace(/\\/g, '/');   
+                    .replace('public\\', './')
+                    .replace(/\\/g, '/');
                 $('#profileImg').css('background-image', `url(${transformedPath})`);
                 $('#accountIcon').css('background-image', `url(${transformedPath})`);
                 $('.profileName').text(user.login);
@@ -238,18 +269,18 @@ function showProfile(userId) {
 
 showProfile(userId)
 
-$(`#changeNameBtn`).click(() => { 
+$(`#changeNameBtn`).click(() => {
     axios.put(`/chageName/${userId}`, {
         login: $('#changeNameInput').val()
     })
-    .then((res) => {
-        console.log(res);
-        showProfile(userId)
-        $(`.changeNameContainer`).css(`display`, `none`);
-        $(`.profileContainer`).css(`display`, `flex`);
-        $('#changeNameInput').val(``)
-    })
-    .catch((error) => {
-        console.log(error);
-    });
+        .then((res) => {
+            console.log(res);
+            showProfile(userId)
+            $(`.changeNameContainer`).css(`display`, `none`);
+            $(`.profileContainer`).css(`display`, `flex`);
+            $('#changeNameInput').val(``)
+        })
+        .catch((error) => {
+            console.log(error);
+        });
 })
