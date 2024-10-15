@@ -67,7 +67,7 @@ function appendMessage(type, userName, message) {
     `);
 }
 
-$(`#MenuBtn`).click(() => { 
+$(`#MenuBtn`).click(() => {
     if ($(`#MenuBtn`).hasClass(`fa-bars`)) {
         $(`.mainChatContainer`).css('margin-top', '10px');
         $(`header`).css('width', '300px');
@@ -88,7 +88,7 @@ $(`#MenuBtn`).click(() => {
         $(`#searchBtn`).css(`width`, `40px`);
         $(`#searchBtn`).css(`height`, `40px`);
         $(`.settingsText`).css(`display`, `flex`);
-    }else if ($(`#MenuBtn`).hasClass(`fa-xmark`)) {
+    } else if ($(`#MenuBtn`).hasClass(`fa-xmark`)) {
         $(`.mainChatContainer`).css('margin-top', '0');
         $(`header`).css('width', '100px');
         $(`.mainChat`).css('background-color', '#264653');
@@ -114,7 +114,7 @@ $(`#MenuBtn`).click(() => {
 });
 
 $(`#searchBtn`).click(() => {
-    if($(`#searchBtn`).hasClass(`openMenu`)) {
+    if ($(`#searchBtn`).hasClass(`openMenu`)) {
         $(`.mainChatContainer`).css('margin-top', '10px');
         $(`header`).css('width', '300px');
         $(`.mainChat`).css('background-color', '#2d5362');
@@ -135,41 +135,121 @@ $(`#searchBtn`).click(() => {
         $(`#searchBtn`).css(`height`, `40px`);
         $(`#searchBtn`).removeClass(`openMenu`);
         $(`#searchBtn`).addClass(`search`);
-    }else if($(`#MenuBtn`).hasClass(`fa-xmark`)) {
+    } else if ($(`#MenuBtn`).hasClass(`fa-xmark`)) {
         console.log(`Search button clicked`);
     }
 });
 
-$(`.accountContainer`).click(()=>{
+$(`.accountContainer`).click(() => {
     $(`.profileContainer`).css(`display`, `flex`);
     $(`.wrap`).css(`filter`, `brightness(0.7)`);
 });
 
-$(`.closeProfileBtn`).click(()=>{
+$(`.closeProfileBtn`).click(() => {
     $(`.profileContainer`).css(`display`, `none`);
     $(`.wrap`).css(`filter`, `brightness(1)`);
 })
 
-$(`.openChangeNameContainer`).click(()=>{
+$(`.openChangeNameContainer`).click(() => {
     $(`.changeNameContainer`).css(`display`, `flex`);
     $(`.profileContainer`).css(`display`, `none`);
     $(`.wrap`).css(`filter`, `brightness(0.7)`);
 })
 
-$(`#cancelNameBtn`).click(()=>{
+$(`#cancelNameBtn`).click(() => {
     $(`.changeNameContainer`).css(`display`, `none`);
     $(`.profileContainer`).css(`display`, `flex`);
-    $(`.wrap`).css(`filter`, `brightness(1)`);
 })
 
-$(`.openChangeProfileImg`).click(()=>{
+$(`.openChangeProfileImg`).click(() => {
     $(`.changeProfileImgContainer`).css(`display`, `flex`);
     $(`.profileContainer`).css(`display`, `none`);
     $(`.wrap`).css(`filter`, `brightness(0.7)`);
 })
 
-$(`.closeImgBtn`).click(()=>{
+$(`.closeImgBtn`).click(() => {
     $(`.changeProfileImgContainer`).css(`display`, `none`);
     $(`.profileContainer`).css(`display`, `flex`);
-    $(`.wrap`).css(`filter`, `brightness(1)`);
+})
+
+$(`.selectFile`).click(() => {
+    $(`#changeProfileImgInput`).click();
+})
+
+$(`.drag-and-drop`).on('dragover', (e) => {
+    e.preventDefault();
+});
+
+$(`.drag-and-drop`).on('drop', (e) => {
+    e.preventDefault();
+
+    const file = e.originalEvent.dataTransfer.files[0];
+    handleFile(file, userId);
+});
+
+$(`#changeProfileImgInput`).on('change', function () {
+    const file = this.files[0];
+    if (file) {
+        console.log(file);
+        handleFile(file, userId);
+    }
+});
+
+function handleFile(file, userId) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userId', userId);
+
+    axios.post('/upload', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+        .then(res => {
+            console.log(res);
+            showProfile(userId)
+            $(`.changeProfileImgContainer`).css(`display`, `none`);
+            $(`.profileContainer`).css(`display`, `flex`);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+function showProfile(userId) {
+    axios.get(`/allUsers`)
+        .then((res) => {
+            const user = res.data.find(el => el._id === userId);
+            if (user) {
+                const originalPath = user.path;
+                const transformedPath = originalPath
+                    .replace('public\\', './') 
+                    .replace(/\\/g, '/');   
+                $('#profileImg').css('background-image', `url(${transformedPath})`);
+                $('#accountIcon').css('background-image', `url(${transformedPath})`);
+                $('.profileName').text(user.login);
+                $('.accountName').text(user.login);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
+
+showProfile(userId)
+
+$(`#changeNameBtn`).click(() => { 
+    axios.put(`/chageName/${userId}`, {
+        login: $('#changeNameInput').val()
+    })
+    .then((res) => {
+        console.log(res);
+        showProfile(userId)
+        $(`.changeNameContainer`).css(`display`, `none`);
+        $(`.profileContainer`).css(`display`, `flex`);
+        $('#changeNameInput').val(``)
+    })
+    .catch((error) => {
+        console.log(error);
+    });
 })

@@ -45,6 +45,9 @@
   height: 150px;
   border-radius: 50%;
   background-color: #fff;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 .profileContainer .profileImgContainer .openChangeProfileImg {
   position: absolute;
@@ -253,6 +256,9 @@
   border-radius: 50%;
   margin-right: 10px;
   background-color: #376679;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 .wrap header .menuBtnContainer .accountContainer .accountName {
   font-size: 18px;

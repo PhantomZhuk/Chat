@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const multer = require('multer');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -29,7 +30,10 @@ mongoose.connect(process.env.MONGODB_URI)
 
 const userSchema = new mongoose.Schema({
     login: String,
-    password: String
+    password: String,
+    filename: String,
+    path: String,
+    uploadDate: { type: Date, default: Date.now }
 })
 
 const User = mongoose.model("User", userSchema);
@@ -37,10 +41,10 @@ const User = mongoose.model("User", userSchema);
 app.post(`/auth/createUser`, (req, res) => {
     const { login, password } = req.body;
     if (login && password) {
-        const newUser = new User({ login, password });
+        const newUser = new User({ login, password, filename: 'user-icon-on-transparent-background-free-png.webp', path: 'uploads/user-icon-on-transparent-background-free-png.webp', uploadDate: Date.now() });
         newUser.save();
         res.sendStatus(201);
-    }else {
+    } else {
         res.sendStatus(500);
     }
 })
@@ -55,7 +59,7 @@ app.post('/auth/login', async (req, res) => {
         const user = await User.findOne({ login, password });
 
         if (user) {
-            res.sendStatus(200); 
+            res.sendStatus(200);
         } else {
             res.sendStatus(401);
         }
@@ -70,12 +74,59 @@ app.post('/auth/login', async (req, res) => {
 app.get('/allUsers', async (req, res) => {
     try {
         const users = await User.find();
-        
+
         res.send(users);
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
+});
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+
+    if (!req.file) {
+        return res.status(400).send('No file uploaded');
+    }
+
+    const userId = req.body.userId;
+    if (!userId) {
+        return res.status(400).send('No user ID provided');
+    }
+
+    User.findByIdAndUpdate(userId, {
+        filename: req.file.filename,
+        path: req.file.path
+    })
+        .then(() => {
+            res.json({ message: 'File uploaded and user updated successfully' });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send('Error updating user');
+        });
+
+    console.log(req.file);
+});
+
+app.put('/chageName/:id', (req, res) => {
+    User.findByIdAndUpdate(req.params.id, { login: req.body.login })
+    .then(() => {
+        res.json({message: "User updated successfully"});
+    })
+    .catch((err) => {
+        console.log(err);
+    })
 });
 
 

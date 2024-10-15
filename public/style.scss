@@ -47,6 +47,9 @@
             height: 150px;
             border-radius: 50%;
             background-color: #fff;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
         }
 
         .openChangeProfileImg {
@@ -274,6 +277,9 @@
                     border-radius: 50%;
                     margin-right: 10px;
                     background-color: #376679;
+                    background-position: center;
+                    background-size: cover;
+                    background-repeat: no-repeat;
                 }
 
                 .accountName {
