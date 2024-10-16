@@ -18,8 +18,7 @@ socket.on('My message', (data) => {
         .then((res) => {
             const user = res.data.find(el => el._id === userId);
             if (user) {
-                const originalPath = user.path;
-                const transformedPath = originalPath
+                const transformedPath = user.path
                     .replace('public\\', './')
                     .replace(/\\/g, '/');
                 appendMessage('myMessage', nameUser, data.message, transformedPath);
@@ -38,8 +37,7 @@ socket.on('Other message', (data) => {
         .then((res) => {
             const user = res.data.find(el => el._id === data.userId);
             if (user) {
-                const originalPath = user.path;
-                const transformedPath = originalPath
+                const transformedPath = user.path
                     .replace('public\\', './')
                     .replace(/\\/g, '/');
                 getUserNameById(data.userId, (userName) => {
@@ -252,14 +250,16 @@ function showProfile(userId) {
         .then((res) => {
             const user = res.data.find(el => el._id === userId);
             if (user) {
-                const originalPath = user.path;
-                const transformedPath = originalPath
+                const transformedPath = user.path
                     .replace('public\\', './')
                     .replace(/\\/g, '/');
+
+                console.log(transformedPath); 
                 $('#profileImg').css('background-image', `url(${transformedPath})`);
                 $('#accountIcon').css('background-image', `url(${transformedPath})`);
                 $('.profileName').text(user.login);
                 $('.accountName').text(user.login);
+                showMainChatMessages(userId);
             }
         })
         .catch((err) => {
@@ -289,3 +289,36 @@ $(`.signOutBtn`).click(() => {
     $.removeCookie('userToken');
     window.location.href = '/';
 })
+
+function showMainChatMessages(userId) {
+    axios.get(`/mainChatMessages`)
+        .then((messageRes) => {
+            axios.get(`/allUsers`)
+                .then((userRes) => {
+                    const users = userRes.data;
+                    $(`.messageContainer`).empty();
+                    for (let message of messageRes.data) {
+                        const user = users.find(el => el._id === message.userId);
+                        if (user) {
+                            const transformedPath = user.path
+                                .replace('public\\', './')
+                                .replace(/\\/g, '/');
+
+                            if (message.userId === userId) {
+                                appendMessage('myMessage', user.login, message.message, transformedPath);
+                            } else {
+                                appendMessage('otherMessage', user.login, message.message, transformedPath);
+                            }
+                        }
+                    }
+
+                    $('.messageContainer').animate({
+                        scrollTop: $('.messageContainer').prop('scrollHeight')
+                    }, 'slow');
+                })
+                .catch((err) => console.log(err));
+        })
+        .catch((err) => console.log(err));
+}
+
+showMainChatMessages(userId)

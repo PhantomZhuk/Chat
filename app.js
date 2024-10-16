@@ -129,6 +129,12 @@ app.put('/chageName/:id', (req, res) => {
     })
 });
 
+const mainChatMessage = new mongoose.Schema({
+    message: String,
+    userId: String
+})
+
+const mainChat = mongoose.model("mainChatMessage", mainChatMessage);
 
 let connectionUsers = 0;
 
@@ -140,6 +146,7 @@ io.on('connection', (socket) => {
 
     socket.on('chat message', (data) => {
         const { message, userId } = data;
+        mainChat.create({ message, userId });
         socket.emit('My message', { message, userId });
         socket.broadcast.emit('Other message', { message, userId });
     });
@@ -150,6 +157,16 @@ io.on('connection', (socket) => {
         io.emit('connectionUsers', connectionUsers);
     });
 });
+
+app.get(`/mainChatMessages`, async (req, res) => {
+    try {
+        const messages = await mainChat.find();
+        res.send(messages);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+})
 
 server.listen(PORT, () => {
     console.log(`listening on ${PORT}`);
