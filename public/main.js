@@ -284,3 +284,8 @@ $(`#changeNameBtn`).click(() => {
             console.log(error);
         });
 })
+
+$(`.signOutBtn`).click(() => {
+    $.removeCookie('userToken');
+    window.location.href = '/';
+})
