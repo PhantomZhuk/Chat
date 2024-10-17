@@ -339,6 +339,7 @@
                 display: flex;
                 justify-content: center;
                 border-radius: 10px;
+                cursor: pointer;
 
                 .mainChatIcon {
                     width: 65px;
@@ -348,7 +349,6 @@
                     align-items: center;
                     background-color: #376679;
                     border-radius: 10px;
-                    cursor: pointer;
                 }
 
                 .mainChatName {
@@ -365,6 +365,31 @@
                 overflow: scroll;
                 -ms-overflow-style: none;
                 scrollbar-width: none;
+                margin-top: 10px;
+
+                .chat {
+                    width: 90%;
+                    display: flex;
+                    justify-content: center;
+                    border-radius: 10px;
+                    cursor: pointer;
+
+                    .chatIcon {
+                        width: 65px;
+                        height: 65px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background-color: #376679;
+                        border-radius: 10px;
+                    }
+
+                    .chatName {
+                        width: calc(100% - 100px);
+                        display: none;
+                        margin-top: 20px;
+                    }
+                }
             }
 
             .addChatBtn {
@@ -374,7 +399,6 @@
                 justify-content: center;
                 align-items: center;
                 background-color: rgba(55, 102, 121, 0.4);
-                margin: 10px;
                 border-radius: 10px;
                 cursor: pointer;
             }

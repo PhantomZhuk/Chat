@@ -121,12 +121,12 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
 app.put('/chageName/:id', (req, res) => {
     User.findByIdAndUpdate(req.params.id, { login: req.body.login })
-    .then(() => {
-        res.json({message: "User updated successfully"});
-    })
-    .catch((err) => {
-        console.log(err);
-    })
+        .then(() => {
+            res.json({ message: "User updated successfully" });
+        })
+        .catch((err) => {
+            console.log(err);
+        })
 });
 
 const mainChatMessage = new mongoose.Schema({
@@ -145,10 +145,10 @@ io.on('connection', (socket) => {
     io.emit('connectionUsers', connectionUsers);
 
     socket.on('chat message', (data) => {
-        const { message, userId } = data;
-        mainChat.create({ message, userId });
-        socket.emit('My message', { message, userId });
-        socket.broadcast.emit('Other message', { message, userId });
+        const { message, userId, chatId } = data;
+        mainChat.create({ message, userId, chatId});
+        socket.emit('My message', { message, userId , chatId});
+        socket.broadcast.emit('Other message', { message, userId, chatId});
     });
 
     socket.on('disconnect', () => {
@@ -164,6 +164,77 @@ app.get(`/mainChatMessages`, async (req, res) => {
         res.send(messages);
     } catch (error) {
         console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+const chat = new mongoose.Schema({
+    nameChat: String
+})
+
+const Chats = mongoose.model("chats", chat);
+
+app.post(`/createChat`, (req, res) => {
+    const { nameChat } = req.body;
+    if (!nameChat) {
+        return res.status(400).send('Missing nameChat');
+    }
+
+    const newChat = new Chats({ nameChat });
+    newChat.save();
+    res.sendStatus(201);
+})
+
+app.get(`/chats`, async (req, res) => {
+    try {
+        const chats = await chats.find();
+        res.send(chats);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+app.put(`/chats/:id`, async (req, res) => {
+    try {
+        const { nameChat, chatId } = req.body;
+        if (!nameChat || !chatId) {
+            return res.status(400).send('Missing nameChat');
+        }
+
+        const chat = await Chats.findByIdAndUpdate(chatId, { nameChat });
+        res.sendStatus(200);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+const message = new mongoose.Schema({
+    message: String,
+    chatId: String,
+    userId: String
+})
+
+const Messages = mongoose.model("messages", message);
+
+app.post(`/createMessage`, (req, res) => {
+    const { message, chatId, userId } = req.body;
+    if (!message || !chatId || !userId) {
+        return res.status(400).send('Missing message, chatId or userId');
+    }
+
+    const newMessage = new Messages({ message, chatId, userId });
+    newMessage.save();
+    res.sendStatus(201);
+})
+
+app.get(`/messages`, async (req, res) => {
+    try {
+        const messages = await Messages.find();
+        res.send(messages);
+    }catch (error){
+        console.log(error);
         res.status(500).send('Internal Server Error');
     }
 })
