@@ -185,9 +185,9 @@ app.post(`/createChat`, (req, res) => {
     res.sendStatus(201);
 })
 
-app.get(`/chats`, async (req, res) => {
+app.get(`/Allchats`, async (req, res) => {
     try {
-        const chats = await chats.find();
+        const chats = await Chats.find();
         res.send(chats);
     } catch (error) {
         console.error(error);

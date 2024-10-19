@@ -216,6 +216,89 @@
   padding: 20px;
 }
 
+.addChatContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  height: 200px;
+  background-color: #376679;
+  border-radius: 10px;
+  z-index: 10;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+.addChatContainer .title {
+  width: 90%;
+  color: #fff;
+  font-size: 22px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.addChatContainer .title .closeAddChatBtn {
+  cursor: pointer;
+}
+.addChatContainer .addChatInput {
+  width: 85%;
+  height: 40px;
+  border: none;
+  border-bottom: 3px solid #ffffff;
+  outline: none;
+  background-color: #376679;
+  color: #fff;
+  font-size: 16px;
+}
+.addChatContainer .addChatInput::-moz-placeholder {
+  color: #fff;
+}
+.addChatContainer .addChatInput::placeholder {
+  color: #fff;
+}
+.addChatContainer .btnContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 10px;
+}
+.addChatContainer .btnContainer button {
+  width: 100px;
+  height: 40px;
+  border: none;
+  outline: none;
+  background-color: #264653;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 10px;
+  margin: 0 10px;
+}
+
+.notificationContainer {
+  padding: 10px 20px;
+  min-width: 250px;
+  min-height: 75px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 11;
+  background-color: #264653;
+  border-radius: 10px;
+}
+.notificationContainer .notificationText {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 400;
+}
+
 .wrap {
   width: 100%;
   min-height: 100vh;
@@ -344,6 +427,7 @@
   justify-content: center;
   border-radius: 10px;
   cursor: pointer;
+  margin-bottom: 10px;
 }
 .wrap header .mainChatContainer .chatContainer .chat .chatIcon {
   width: 65px;

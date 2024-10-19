@@ -183,6 +183,7 @@ $(`#searchBtn`).click(() => {
 $(`.accountContainer`).click(() => {
     $(`.profileContainer`).css(`display`, `flex`);
     $(`.wrap`).css(`filter`, `brightness(0.7)`);
+    $(`.addChatContainer`).css(`display`, `none`);
 });
 
 $(`.closeProfileBtn`).click(() => {
@@ -194,6 +195,7 @@ $(`.openChangeNameContainer`).click(() => {
     $(`.changeNameContainer`).css(`display`, `flex`);
     $(`.profileContainer`).css(`display`, `none`);
     $(`.wrap`).css(`filter`, `brightness(0.7)`);
+    $(`.addChatContainer`).css(`display`, `none`);
 })
 
 $(`#cancelNameBtn`).click(() => {
@@ -205,6 +207,7 @@ $(`.openChangeProfileImg`).click(() => {
     $(`.changeProfileImgContainer`).css(`display`, `flex`);
     $(`.profileContainer`).css(`display`, `none`);
     $(`.wrap`).css(`filter`, `brightness(0.7)`);
+    $(`.addChatContainer`).css(`display`, `none`);
 })
 
 $(`.closeImgBtn`).click(() => {
@@ -250,6 +253,7 @@ function handleFile(file, userId) {
             showProfile(userId)
             $(`.changeProfileImgContainer`).css(`display`, `none`);
             $(`.profileContainer`).css(`display`, `flex`);
+            notification(`Profile image changed`);
         })
         .catch((error) => {
             console.log(error);
@@ -265,7 +269,7 @@ function showProfile(userId) {
                     .replace('public\\', './')
                     .replace(/\\/g, '/');
 
-                console.log(transformedPath); 
+                console.log(transformedPath);
                 $('#profileImg').css('background-image', `url(${transformedPath})`);
                 $('#accountIcon').css('background-image', `url(${transformedPath})`);
                 $('.profileName').text(user.login);
@@ -290,6 +294,7 @@ $(`#changeNameBtn`).click(() => {
             $(`.changeNameContainer`).css(`display`, `none`);
             $(`.profileContainer`).css(`display`, `flex`);
             $('#changeNameInput').val(``)
+            notification(`Name changed`);
         })
         .catch((error) => {
             console.log(error);
@@ -334,12 +339,85 @@ function showMainChatMessages(userId) {
 
 showMainChatMessages(userId);
 
-function createChat(nameChat){
+function notification(notification) {
+    $(`.notificationContainer`).css('display', 'flex');
+    $(`.notificationText`).text(notification);
+    setTimeout(() => {
+        $(`.notificationContainer`).css('display', 'none');
+        $(`.notificationText`).text(``);
+    }, 3000);
+}
+
+function createChat(nameChat) {
     axios.post(`/createChat`, { nameChat })
         .then((res) => {
             console.log(res);
+            notification(`Chat ${nameChat} created`);
+            $(`.addChatContainer`).css(`display`, `none`);
+            $(`.wrap`).css(`filter`, `brightness(1)`);
+            showChats()
         })
         .catch((error) => {
             console.log(error);
         });
 }
+
+$(`.addChatBtn`).click(() => {
+    $(`.addChatContainer`).css(`display`, `flex`);
+    $(`.profileContainer`).css(`display`, `none`);
+    $(`.changeProfileImgContainer`).css(`display`, `none`);
+    $(`.changeNameContainer`).css(`display`, `none`);
+    $(`.wrap`).css(`filter`, `brightness(0.7)`);
+})
+
+$(`.closeAddChatBtn`).click(() => {
+    $(`.addChatContainer`).css(`display`, `none`);
+    $(`.wrap`).css(`filter`, `brightness(1)`);
+})
+
+$(`#addChatBtn`).click(() => {
+    axios.get(`/chats`)
+        .then(res => {
+            console.log(res);
+            let chatCreated = false;
+            for (let chat of res.data) {
+                if (chat.chatName === $('#addChatInput').val()) {
+                    chatCreated = true;
+                }
+            }
+
+            if (!chatCreated) {
+                if ($('#addChatInput').val().length > 27) {
+                    notification(`Chat name is too long`);
+                }else {
+                    createChat($('#addChatInput').val());
+                    $(`#addChatInput`).val(``);
+                }
+            } else {
+                notification(`Chat ${$('#addChatInput').val()} already exists`);
+            }
+        })
+        .catch(err => {
+            console.log(err);
+        })
+})
+
+function showChats() {
+    axios.get('/Allchats')
+        .then((res) => {
+            $('.chatContainer').empty();
+            for (let chat of res.data) {
+                let chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
+                console.log(chatIcon);
+                $('.chatContainer').append(`
+                    <div class="chat">
+                        <p class="chatIcon">${chatIcon}</p>
+                        <p class="chatName">${chat.nameChat}</p>
+                    </div>
+                `);
+            }
+        })
+        .catch((err) => console.log(err));
+}
+
+showChats()
