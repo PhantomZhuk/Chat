@@ -33,7 +33,8 @@ const userSchema = new mongoose.Schema({
     password: String,
     filename: String,
     path: String,
-    uploadDate: { type: Date, default: Date.now }
+    uploadDate: { type: Date, default: Date.now },
+    chats: [String]
 })
 
 const User = mongoose.model("User", userSchema);
@@ -146,9 +147,14 @@ io.on('connection', (socket) => {
 
     socket.on('chat message', (data) => {
         const { message, userId, chatId } = data;
-        mainChat.create({ message, userId, chatId});
-        socket.emit('My message', { message, userId , chatId});
-        socket.broadcast.emit('Other message', { message, userId, chatId});
+        console.log(chatId);
+        if (chatId === `mainChat`) {
+            mainChat.create({ message, userId, chatId });
+        } else {
+            Messages.create({ message, userId, chatId });
+        }
+        socket.emit('My message', { message, userId, chatId });
+        socket.broadcast.emit('Other message', { message, userId, chatId });
     });
 
     socket.on('disconnect', () => {
@@ -175,14 +181,69 @@ const chat = new mongoose.Schema({
 const Chats = mongoose.model("chats", chat);
 
 app.post(`/createChat`, (req, res) => {
-    const { nameChat } = req.body;
+    const { nameChat, userId } = req.body;
     if (!nameChat) {
         return res.status(400).send('Missing nameChat');
     }
 
     const newChat = new Chats({ nameChat });
-    newChat.save();
-    res.sendStatus(201);
+    newChat.save()
+        .then((savedChat) => {
+            return User.findByIdAndUpdate(
+                userId,
+                { $push: { chats: savedChat._id } },
+                { new: true }
+            );
+        })
+        .then(() => {
+            res.sendStatus(201);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error creating chat or updating user');
+        });
+})
+
+app.post(`/createUserChat`, (req, res) => {
+    const { nameChat, usersId } = req.body;
+
+    if (!nameChat || !usersId) {
+        return res.status(400).send('Missing nameChat or usersId');
+    }
+
+    const newChat = new Chats({ nameChat });
+
+    newChat.save()
+        .then((savedChat) => {
+            return Promise.all(
+                usersId.map(userId => 
+                    User.findByIdAndUpdate(userId, { $push: { chats: savedChat._id } })
+                )
+            );
+        })
+        .then(() => {
+            res.sendStatus(201);
+        })
+        .catch((err) => {
+            res.status(500).send('Error creating chat or updating users');
+        });
+});
+
+
+app.post(`/addChatToUser`, (req, res) => {
+    const { userId, chatId } = req.body;
+    if (!userId || !chatId) {
+        return res.status(400).send('Missing userId or chatId');
+    }
+
+    User.findByIdAndUpdate(userId, { $push: { chats: chatId } })
+        .then(() => {
+            res.sendStatus(200);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error adding chat to user');
+        });
 })
 
 app.get(`/Allchats`, async (req, res) => {
@@ -218,22 +279,11 @@ const message = new mongoose.Schema({
 
 const Messages = mongoose.model("messages", message);
 
-app.post(`/createMessage`, (req, res) => {
-    const { message, chatId, userId } = req.body;
-    if (!message || !chatId || !userId) {
-        return res.status(400).send('Missing message, chatId or userId');
-    }
-
-    const newMessage = new Messages({ message, chatId, userId });
-    newMessage.save();
-    res.sendStatus(201);
-})
-
 app.get(`/messages`, async (req, res) => {
     try {
         const messages = await Messages.find();
         res.send(messages);
-    }catch (error){
+    } catch (error) {
         console.log(error);
         res.status(500).send('Internal Server Error');
     }

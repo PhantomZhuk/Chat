@@ -2,13 +2,15 @@ const socket = io();
 let userId = $.cookie('userToken');
 let nameUser;
 
+let chatToken = $.cookie('chatToken') || 'mainChat';
+
 authorisationCheck(userId);
 
 $('.sendMessageContainer').on('submit', (e) => {
     e.preventDefault();
     const message = $('#sendMessageInput').val();
     if (message) {
-        socket.emit('chat message', { message, userId });
+        socket.emit('chat message', { message, userId, chatId: chatToken });
         $('#sendMessageInput').val('');
     }
 });
@@ -21,7 +23,7 @@ socket.on('My message', (data) => {
                 const transformedPath = user.path
                     .replace('public\\', './')
                     .replace(/\\/g, '/');
-                appendMessage('myMessage', nameUser, data.message, transformedPath);
+                appendMessage('myMessage', nameUser, data.message, transformedPath, chatToken);
                 $('.messageContainer').animate({
                     scrollTop: $('.messageContainer').prop('scrollHeight')
                 }, 'slow');
@@ -41,7 +43,7 @@ socket.on('Other message', (data) => {
                     .replace('public\\', './')
                     .replace(/\\/g, '/');
                 getUserNameById(data.userId, (userName) => {
-                    appendMessage('otherMessage', userName, data.message, transformedPath);
+                    appendMessage('otherMessage', userName, data.message, transformedPath, data.chatId);
                     $('.messageContainer').animate({
                         scrollTop: $('.messageContainer').prop('scrollHeight')
                     }, 'slow');
@@ -82,18 +84,20 @@ function getUserNameById(id, callback) {
         .catch(() => callback('Unknown'));
 }
 
-function appendMessage(type, userName, message, photoUrl) {
-    $('.messageContainer').append(`
-        <div class="${type}">
-            <div class="iconContainer">
-                <div class="icon" style="background-image: url('${photoUrl}');"></div>
+function appendMessage(type, userName, message, photoUrl, chatId) {
+    if (chatId == chatToken) {
+        $('.messageContainer').append(`
+            <div class="${type}">
+                <div class="iconContainer">
+                    <div class="icon" style="background-image: url('${photoUrl}');"></div>
+                </div>
+                <div class="nameContainer">
+                    <div class="nameUser">${userName}</div>
+                    <div class="message">${message}</div>
+                </div>
             </div>
-            <div class="nameContainer">
-                <div class="nameUser">${userName}</div>
-                <div class="message">${message}</div>
-            </div>
-        </div>
-    `);
+        `);
+    }
 }
 
 $(`#MenuBtn`).click(() => {
@@ -121,6 +125,10 @@ $(`#MenuBtn`).click(() => {
         $(`.chat`).css('justify-content', 'flex-start');
         $(`.chatIcon`).css('margin', '10px');
         $(`.chatName`).css('display', 'flex');
+        $(`.searchChat`).css('background-color', '#2d5362');
+        $(`.searchChat`).css('justify-content', 'flex-start');
+        $(`.searchChatIcon`).css('margin', '10px');
+        $(`.searchChatName`).css('display', 'flex');
     } else if ($(`#MenuBtn`).hasClass(`fa-xmark`)) {
         $(`.mainChatContainer`).css('margin-top', '0');
         $(`header`).css('width', '100px');
@@ -147,6 +155,10 @@ $(`#MenuBtn`).click(() => {
         $(`.chat`).css('justify-content', 'center');
         $(`.chatIcon`).css('margin', '0');
         $(`.chatName`).css('display', 'none');
+        $(`.searchChat`).css('background-color', '#264653');
+        $(`.searchChat`).css('justify-content', 'center');
+        $(`.searchChatIcon`).css('margin', '0');
+        $(`.searchChatName`).css('display', 'none');
     }
 });
 
@@ -175,6 +187,10 @@ $(`#searchBtn`).click(() => {
         $(`.chat`).css('justify-content', 'flex-start');
         $(`.chatIcon`).css('margin', '10px');
         $(`.chatName`).css('display', 'flex');
+        $(`.searchChat`).css('background-color', '#2d5362');
+        $(`.searchChat`).css('justify-content', 'flex-start');
+        $(`.searchChatIcon`).css('margin', '10px');
+        $(`.searchChatName`).css('display', 'flex');
     } else if ($(`#MenuBtn`).hasClass(`fa-xmark`)) {
         console.log(`Search button clicked`);
     }
@@ -321,9 +337,9 @@ function showMainChatMessages(userId) {
                                 .replace(/\\/g, '/');
 
                             if (message.userId === userId) {
-                                appendMessage('myMessage', user.login, message.message, transformedPath);
+                                appendMessage('myMessage', user.login, message.message, transformedPath, chatToken);
                             } else {
-                                appendMessage('otherMessage', user.login, message.message, transformedPath);
+                                appendMessage('otherMessage', user.login, message.message, transformedPath, chatToken);
                             }
                         }
                     }
@@ -348,8 +364,8 @@ function notification(notification) {
     }, 3000);
 }
 
-function createChat(nameChat) {
-    axios.post(`/createChat`, { nameChat })
+function createChat(nameChat, userId) {
+    axios.post(`/createChat`, { nameChat, userId })
         .then((res) => {
             console.log(res);
             notification(`Chat ${nameChat} created`);
@@ -389,8 +405,8 @@ $(`#addChatBtn`).click(() => {
             if (!chatCreated) {
                 if ($('#addChatInput').val().length > 27) {
                     notification(`Chat name is too long`);
-                }else {
-                    createChat($('#addChatInput').val());
+                } else {
+                    createChat($('#addChatInput').val(), userId);
                     $(`#addChatInput`).val(``);
                 }
             } else {
@@ -403,21 +419,157 @@ $(`#addChatBtn`).click(() => {
 })
 
 function showChats() {
-    axios.get('/Allchats')
+    axios.get(`allUsers`)
         .then((res) => {
-            $('.chatContainer').empty();
-            for (let chat of res.data) {
-                let chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
-                console.log(chatIcon);
-                $('.chatContainer').append(`
-                    <div class="chat">
-                        <p class="chatIcon">${chatIcon}</p>
-                        <p class="chatName">${chat.nameChat}</p>
-                    </div>
-                `);
+            $(`.chatContainer`).empty();
+            for (let user of res.data) {
+                if (user._id == userId) {
+                    for (let chat of user.chats) {
+                        let chatId = chat;
+                        axios.get(`/Allchats`)
+                            .then((res) => {
+                                for (let chat of res.data) {
+                                    if (chat._id === chatId) {
+                                        let chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
+                                        $('.chatContainer').append(`
+                                            <div class="chat" id="${chat._id}">
+                                                <p class="chatIcon" id="${chat._id}">${chatIcon}</p>
+                                                <p class="chatName" id="${chat._id}">${chat.nameChat}</p>
+                                            </div>
+                                        `);
+                                    }
+                                }
+                            })
+                    }
+                }
             }
         })
         .catch((err) => console.log(err));
 }
 
-showChats()
+showChats();
+
+function showMessages(chatId, userId) {
+    axios.get(`/messages`)
+        .then(res => {
+            $(`.messageContainer`).empty();
+            for (let message of res.data) {
+                if (message.chatId === chatId) {
+                    if (message.userId === userId) {
+                        axios.get(`/allUsers`)
+                            .then((res) => {
+                                const user = res.data.find(el => el._id === userId);
+                                if (user) {
+                                    const transformedPath = user.path
+                                        .replace('public\\', './')
+                                        .replace(/\\/g, '/');
+                                    appendMessage('myMessage', nameUser, message.message, transformedPath, chatId);
+                                    $('.messageContainer').animate({
+                                        scrollTop: $('.messageContainer').prop('scrollHeight')
+                                    }, 'slow');
+                                }
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                            });
+                    } else {
+                        axios.get(`/allUsers`)
+                            .then((res) => {
+                                const user = res.data.find(el => el._id === message.userId);
+                                if (user) {
+                                    const transformedPath = user.path
+                                        .replace('public\\', './')
+                                        .replace(/\\/g, '/');
+                                    appendMessage('otherMessage', user.login, message.message, transformedPath, chatId);
+                                    $('.messageContainer').animate({
+                                        scrollTop: $('.messageContainer').prop('scrollHeight')
+                                    }, 'slow');
+                                }
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                            });
+                    }
+                }
+            }
+        })
+}
+
+$(`.chatContainer`).on(`click`, `.chat`, (e) => {
+    let ID = e.target.id;
+    axios.get(`/Allchats`)
+        .then((res) => {
+            for (let chat of res.data) {
+                if (chat._id === ID) {
+                    $(`.nameChat`).text(`${chat.nameChat}`);
+                    $.cookie('chatToken', chat._id);
+                    showMessages(chat._id, userId);
+                }
+            }
+        })
+})
+
+$(`.mainChat`).click(() => {
+    $.cookie('chatToken', `mainChat`);
+    showMainChatMessages(userId);
+    $(`.nameChat`).text(`Main chat`);
+})
+
+$(`#searchInput`).on(`input`, () => {
+    if ($(`#searchInput`).val().length > 0) {
+        $(`.searchChatContainer`).css(`display`, `flex`);
+        $(`.mainChatContainer`).css(`display`, `none`);
+
+        axios.get(`/Allchats`)
+            .then((res) => {
+                $(`.searchChatContainer`).empty();
+                for (let chat of res.data) {
+                    if (chat.nameChat.toLowerCase().includes($(`#searchInput`).val().toLowerCase())) {
+                        let chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
+                        $(`.searchChatContainer`).append(`
+                            <div class="searchChat" id="${chat._id}">
+                                <p class="searchChatIcon" id="${chat._id}">${chatIcon}</p>
+                                <p class="searchChatName" id="${chat._id}">${chat.nameChat}</p>
+                            </div>
+                        `);
+                    }
+                }
+            })
+    } else {
+        $(`.searchChatContainer`).css(`display`, `none`);
+        $(`.mainChatContainer`).css(`display`, `flex`);
+    }
+})
+
+$(`.searchChatContainer`).on(`click`, `.searchChat`, (e) => {
+    let ID = e.target.id;
+    axios.get(`/allUsers`)
+        .then(res => {
+            for (let user of res.data) {
+                for (let chat of user.chats) {
+                    if (chat === ID) {
+                        axios.get(`/Allchats`)
+                            .then((res) => {
+                                for (let chat of res.data) {
+                                    if (chat._id === ID) {
+                                        $(`.nameChat`).text(`${chat.nameChat}`);
+                                        $.cookie('chatToken', chat._id);
+                                        showMessages(chat._id, userId);
+                                        $(`.searchChatContainer`).css(`display`, `none`);
+                                        $(`.mainChatContainer`).css(`display`, `flex`);
+                                        $(`#searchInput`).val(``);
+                                    }
+                                }
+                            })
+                    } else {
+                        $(`.searchChatContainer`).css(`display`, `none`);
+                        $(`.mainChatContainer`).css(`display`, `flex`);
+                        $(`#searchInput`).val(``);
+                        showMessages(chat._id, userId);
+                        axios.post(`/createChat`, { nameChat: [user.login, userId], userId: [user._id, userId] })
+                    }
+                }
+            }
+        })
+})
+
