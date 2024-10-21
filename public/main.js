@@ -2,6 +2,14 @@ const socket = io();
 let userId = $.cookie('userToken');
 let nameUser;
 
+axios.get('/allUsers')
+    .then((res) => {
+        nameUser = res.data.find(el => el._id === userId).login;
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+
 let chatToken = $.cookie('chatToken') || 'mainChat';
 
 authorisationCheck(userId);
@@ -430,13 +438,26 @@ function showChats() {
                             .then((res) => {
                                 for (let chat of res.data) {
                                     if (chat._id === chatId) {
-                                        let chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
-                                        $('.chatContainer').append(`
-                                            <div class="chat" id="${chat._id}">
-                                                <p class="chatIcon" id="${chat._id}">${chatIcon}</p>
-                                                <p class="chatName" id="${chat._id}">${chat.nameChat}</p>
-                                            </div>
-                                        `);
+                                        if (chat.nameChat.includes(',')) {
+                                            let chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
+                                            let chatName = chat.nameChat;
+                                            let usersArray = chatName.split(", ");
+                                            let remainingUsers = usersArray.filter(name => name !== nameUser).join(", ");
+                                            $('.chatContainer').append(`
+                                                <div class="chat" id="${chat._id}">
+                                                    <p class="chatIcon" id="${chat._id}">${chatIcon}</p>
+                                                    <p class="chatName" id="${chat._id}">${remainingUsers}</p>
+                                                </div>
+                                            `);
+                                        } else {
+                                            let chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
+                                            $('.chatContainer').append(`
+                                                <div class="chat" id="${chat._id}">
+                                                    <p class="chatIcon" id="${chat._id}">${chatIcon}</p>
+                                                    <p class="chatName" id="${chat._id}">${chat.nameChat}</p>
+                                                </div>
+                                            `);
+                                        }
                                     }
                                 }
                             })
@@ -501,9 +522,18 @@ $(`.chatContainer`).on(`click`, `.chat`, (e) => {
         .then((res) => {
             for (let chat of res.data) {
                 if (chat._id === ID) {
-                    $(`.nameChat`).text(`${chat.nameChat}`);
-                    $.cookie('chatToken', chat._id);
-                    showMessages(chat._id, userId);
+                    if (chat.nameChat.includes(',')) {
+                        let chatName = chat.nameChat;
+                        let usersArray = chatName.split(", ");
+                        let remainingUsers = usersArray.filter(name => name !== nameUser).join(", ");
+                        $(`.nameChat`).text(`${remainingUsers}`);
+                        $.cookie('chatToken', chat._id);
+                        showMessages(chat._id, userId);
+                    } else {
+                        $(`.nameChat`).text(`${chat.nameChat}`);
+                        $.cookie('chatToken', chat._id);
+                        showMessages(chat._id, userId);
+                    }
                 }
             }
         })
@@ -573,3 +603,53 @@ $(`.searchChatContainer`).on(`click`, `.searchChat`, (e) => {
         })
 })
 
+$(`#searchBtn`).click(() => {
+    axios.get(`/allUsers`)
+        .then((res) => {
+            $(`.searchChatContainer`).empty();
+            for (let user of res.data) {
+                if (user.login === $('#searchInput').val()) {
+                    let chatIcon = user.login.slice(0, 1).toUpperCase();
+                    $(`.searchChatContainer`).append(`
+                            <div class="searchUser" id="${user._id}">
+                                <p class="searchUserIcon" id="${user._id}">${chatIcon}</p>
+                                <p class="searchUserName" id="${user._id}">${user.login}</p>
+                            </div>
+                        `);
+                }
+            }
+        })
+})
+
+$(`.searchChatContainer`).on(`click`, `.searchUser`, (e) => {
+    let ID = e.target.id;
+
+    axios.get(`/allUsers`)
+        .then((res) => {
+            let nameChat = [ID.login, userId.login];
+            userName = userId.login;
+
+            axios.post(`/createUserChat`, {
+                nameChat,
+                usersId: [ID, userId]
+            })
+                .then((res) => {
+                    $.cookie('chatToken', res.data._id);
+                    let chatName = res.data.nameChat;
+                    let usersArray = chatName.split(", ");
+                    let remainingUsers = usersArray.filter(name => name !== userName).join(", ");
+                    $(`.nameChat`).text(remainingUsers);
+                    showMessages(res.data._id, userId);
+                    $(`.searchChatContainer`).css(`display`, `none`);
+                    $(`.mainChatContainer`).css(`display`, `flex`);
+                    $(`#searchInput`).val(``);
+                    showChats();
+                })
+                .catch((err) => {
+                    console.error('Error creating chat:', err);
+                });
+        })
+        .catch((err) => {
+            console.error('Error fetching users:', err);
+        });
+});

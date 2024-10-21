@@ -418,6 +418,29 @@
   display: flex;
   margin-top: 20px;
 }
+.wrap header .searchChatContainer .searchUser {
+  width: 90%;
+  display: flex;
+  justify-content: flex-start;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #2d5362;
+  margin-bottom: 10px;
+}
+.wrap header .searchChatContainer .searchUser .searchUserIcon {
+  width: 65px;
+  height: 65px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #376679;
+  border-radius: 10px;
+  margin: 10px;
+}
+.wrap header .searchChatContainer .searchUser .searchUserName {
+  display: flex;
+  margin-top: 20px;
+}
 .wrap header .mainChatContainer {
   width: 100%;
   display: flex;

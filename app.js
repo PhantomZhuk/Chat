@@ -211,7 +211,9 @@ app.post(`/createUserChat`, (req, res) => {
         return res.status(400).send('Missing nameChat or usersId');
     }
 
-    const newChat = new Chats({ nameChat });
+    const chatName = nameChat.join(', ');
+
+    const newChat = new Chats({ nameChat: chatName });
 
     newChat.save()
         .then((savedChat) => {
@@ -225,6 +227,7 @@ app.post(`/createUserChat`, (req, res) => {
             res.sendStatus(201);
         })
         .catch((err) => {
+            console.error('Error creating chat or updating users:', err);
             res.status(500).send('Error creating chat or updating users');
         });
 });
