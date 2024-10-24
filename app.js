@@ -9,6 +9,13 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const multer = require('multer');
+const passport = require("passport");
+const session = require("express-session");
+const localStrategy = require("passport-local").Strategy;
+const bycrypt = require("bcryptjs");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
