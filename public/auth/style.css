@@ -27,6 +27,67 @@
   justify-content: center;
   align-items: center;
 }
+.wrap .confirmationCodeContainer {
+  width: 400px;
+  height: 250px;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #376679;
+  box-shadow: 0 0 10px #376679;
+  border-radius: 10px;
+  padding: 20px 0;
+}
+.wrap .confirmationCodeContainer .header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.wrap .confirmationCodeContainer .header h2 {
+  color: #fff;
+}
+.wrap .confirmationCodeContainer .inputContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.wrap .confirmationCodeContainer .inputContainer input {
+  width: 80%;
+  height: 40px;
+  border: none;
+  outline: none;
+  padding: 0 10px;
+  font-size: 16px;
+  background-color: #376679;
+  border-bottom: 2px solid #fff;
+  color: #fff;
+  font-size: 18px;
+}
+.wrap .confirmationCodeContainer .inputContainer input::-moz-placeholder {
+  color: #fff;
+}
+.wrap .confirmationCodeContainer .inputContainer input::placeholder {
+  color: #fff;
+}
+.wrap .confirmationCodeContainer .btnContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.wrap .confirmationCodeContainer .btnContainer button {
+  padding: 10px 60px;
+  border-radius: 10px;
+  background-color: #48869f;
+  box-shadow: 0 0 10px #48869f;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
 .wrap .authForm {
   width: 400px;
   height: 400px;

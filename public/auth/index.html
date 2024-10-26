@@ -30,6 +30,18 @@
     </div>
 
     <div class="wrap">
+        <div class="confirmationCodeContainer">
+            <div class="header">
+                <h2>Confirmation code</h2>
+            </div>
+            <div class="inputContainer">
+                <input type="text" id="confirmationCodeInput" placeholder="Enter confirmation code...">
+            </div>
+            <div class="btnContainer">
+                <button id="verifyCodeBtn">Confirm</button>
+            </div>
+        </div>
+        
         <div class="authForm">
             <div class="btnAuth">
                 <button id="openLoginBtn" class="active">Login</button>
@@ -50,6 +62,8 @@
                 <div class="inputContainer">
                     <input type="text" id="registerInput" placeholder="Enter login..." autocomplete="off">
                     <div class="notificationLogin notification"></div>
+                    <input type="email" id="registerEmailInput" placeholder="Enter email...">
+                    <div class="notificationEmail notification"></div>
                     <input type="password" id="registerPasswordInput" placeholder="Enter password..."
                         autocomplete="off">
                     <div class="notificationPassword notification"></div>

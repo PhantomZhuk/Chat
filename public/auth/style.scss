@@ -27,6 +27,72 @@
     justify-content: center;
     align-items: center;
 
+    .confirmationCodeContainer {
+        width: 400px;
+        height: 250px;
+        display: none;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #376679;
+        box-shadow: 0 0 10px #376679;
+        border-radius: 10px;
+        padding: 20px 0;
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            h2 {
+                color: #fff;
+            }
+        }
+
+        .inputContainer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            input {
+                width: 80%;
+                height: 40px;
+                border: none;
+                outline: none;
+                padding: 0 10px;
+                font-size: 16px;
+                background-color: #376679;
+                border-bottom: 2px solid #fff;
+                color: #fff;
+                font-size: 18px;
+
+                &::placeholder {
+                    color: #fff;
+                }
+            }
+        }
+
+        .btnContainer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            button {
+                padding: 10px 60px;
+                border-radius: 10px;
+                background-color: #48869f;
+                box-shadow: 0 0 10px #48869f;
+                border: none;
+                color: #fff;
+                font-size: 16px;
+                cursor: pointer;
+            }
+        }
+    }
+
     .authForm {
         width: 400px;
         height: 400px;
@@ -88,7 +154,7 @@
             align-items: center;
             background-color: #376679;
             box-shadow: 0 0 10px #376679;
-            border-radius:0 0 10px 10px;
+            border-radius: 0 0 10px 10px;
 
             .inputContainer {
                 width: 100%;

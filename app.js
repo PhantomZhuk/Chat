@@ -16,11 +16,20 @@ const bycrypt = require("bcryptjs");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(`public`));
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_LOGIN,
+        pass: process.env.GMAIL_PASSWORD
+    },
+});
 
 app.get('/chats', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -37,6 +46,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 const userSchema = new mongoose.Schema({
     login: String,
+    email: String,
     password: String,
     filename: String,
     path: String,
@@ -46,12 +56,48 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
+app.post('/sendConfirmationEmail', (req, res) => {
+    let { email } = req.body;
+
+    randomCode = Math.floor(Math.random() * (999999 - 100000) + 100000).toString();
+
+    let mailOptions = {
+        from: 'Chat',
+        to: email,
+        subject: 'Confirm your email',
+        text: randomCode,
+    };
+
+    transporter.sendMail(mailOptions, function (err, info) {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Failed to send email' });
+        } else {
+            console.log(`Message was sent: ${info.response}`);
+            return res.status(200).json({ message: 'Email sent successfully' });
+        }
+    });
+
+    res.send({ message: 'Code sent' });
+});
+
 app.post(`/auth/createUser`, (req, res) => {
-    const { login, password } = req.body;
+    const { login, password, email, code } = req.body;
     if (login && password) {
-        const newUser = new User({ login, password, filename: 'user-icon-on-transparent-background-free-png.webp', path: 'uploads/user-icon-on-transparent-background-free-png.webp', uploadDate: Date.now() });
-        newUser.save();
-        res.sendStatus(201);
+        if (code === randomCode) {
+            const newUser = new User({ 
+                login, 
+                password, 
+                email, 
+                filename: 'user-icon-on-transparent-background-free-png.webp', 
+                path: 'uploads/user-icon-on-transparent-background-free-png.webp', 
+                uploadDate: Date.now() 
+            });
+            newUser.save();
+            res.sendStatus(201);
+        } else {
+            res.sendStatus(401);
+        }
     } else {
         res.sendStatus(500);
     }
@@ -77,7 +123,6 @@ app.post('/auth/login', async (req, res) => {
         res.sendStatus(500);
     }
 });
-
 
 app.get('/allUsers', async (req, res) => {
     try {
@@ -225,7 +270,7 @@ app.post(`/createUserChat`, (req, res) => {
     newChat.save()
         .then((savedChat) => {
             return Promise.all(
-                usersId.map(userId => 
+                usersId.map(userId =>
                     User.findByIdAndUpdate(userId, { $push: { chats: savedChat._id } })
                 )
             );
