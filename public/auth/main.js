@@ -9,6 +9,7 @@ $(document).ready(() => {
         $(`#openRegisterBtn`).addClass('notActive');
         $(`.notification`).text(``);
     })
+
     $('#openRegisterBtn').on('click', () => {
         $('.loginForm').css('display', 'none');
         $('.registerForm').css('display', 'flex');
@@ -19,8 +20,6 @@ $(document).ready(() => {
         $(`#openRegisterBtn`).removeClass('notActive');
         $(`.notification`).text(``);
     })
-
-    let userToken = $.cookie('userToken') || '';
 
     $('#registerBtn').on('click', () => {
         const login = $('#registerInput').val();
@@ -34,13 +33,27 @@ $(document).ready(() => {
         if (loginRegex.test(login)) {
             if (passwordRegex.test(password)) {
                 if (emailRegex.test(email)) {
-                    axios.post(`/sendConfirmationEmail`, { email })
+                    axios.get('/allUsers')
                         .then((res) => {
-                            $(`.confirmationCodeContainer`).css('display', 'flex');
-                            $(`.authForm`).css('display', 'none');
+                            const existingUser = res.data.find(el => el.login === login);
+                            $(`.notification`).css('display', 'none');
+                            $(`.notification`).text(``);
+
+                            if (!existingUser) {
+                                axios.post(`/sendConfirmationEmail`, { email })
+                                    .then((res) => {
+                                        $(`.confirmationCodeContainer`).css('display', 'flex');
+                                        $(`.authForm`).css('display', 'none');
+                                    })
+                                    .catch((error) => {
+                                        console.error('Error sending email:', error);
+                                    });
+                            } else {
+                                showNotification(`User already exists`);
+                            }
                         })
                         .catch((error) => {
-                            console.error('Error sending email:', error);
+                            console.error('Error getting users:', error);
                         });
                 } else {
                     $(`.notificationEmail`).css('display', 'flex');
@@ -69,71 +82,74 @@ $(document).ready(() => {
         const email = $('#registerEmailInput').val();
         const password = $('#registerPasswordInput').val();
         const code = $('#confirmationCodeInput').val();
-        axios.get('/allUsers')
+    
+        axios.post('/auth/createUser', { login, password, email, code })
             .then((res) => {
-                const existingUser = res.data.find(el => el.login === login);
-                $(`.notification`).css('display', 'none');
-                $(`.notification`).text(``);
-
-                if (!existingUser) {
-                    axios.post('/auth/createUser', { login, password, email, code })
-                        .then(() => {
-                            console.log('User created');
-                            axios.get('/allUsers')
-                                .then((res) => {
-                                    const newUser = res.data.find(el => el.login === login && el.password === password && el.email === email);
-
-                                    if (newUser) {
-                                        userToken = $.cookie('userToken', newUser._id, { path: '/' }, { expires: 7 });
-                                        window.location.href = '/chats';
-                                        $('#registerInput').val(``);
-                                        $('#registerPasswordInput').val(``);
-                                    } else {
-                                        showNotification(`User not found`);
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error('Error getting users:', error);
-                                });
-                        })
-                        .catch((error) => {
-                            console.error('Error creating user:', error);
-                        });
-                } else {
-                    showNotification(`User already exists`);
-                }
-            })
-            .catch((error) => {
-                console.error('Error getting users:', error);
-            });
-    })
-
-    $('#loginBtn').on('click', () => {
-        axios.post(`/auth/login`, { login: $('#loginInput').val(), password: $('#passwordInput').val() })
-            .then(() => {
+                console.log('User created');
+                const token = res.data.token;
+                const refreshToken = res.data.refreshToken;
+    
                 axios.get('/allUsers')
                     .then((res) => {
-                        const login = $('#loginInput').val();
-                        const password = $('#passwordInput').val();
-                        const User = res.data.find(el => el.login === login && el.password === password);
-
-                        if (User) {
-                            userToken = $.cookie('userToken', User._id, { path: '/' }, { expires: 7 });
+                        const newUser = res.data.find(el => el.login === login && el.email === email);
+                        console.log(newUser);
+                        console.log(login, password, email);
+    
+                        if (newUser) {
+                            localStorage.setItem('token', token, { path: '/' });
+                            localStorage.setItem('refreshToken', refreshToken, { path: '/' });
+                            $.cookie('userToken', newUser.id, { path: '/' });
                             window.location.href = '/chats';
-                            $('#loginInput').val(``);
-                            $('#passwordInput').val(``);
+                            $('#registerInput').val(``);
+                            $('#registerPasswordInput').val(``);
                         } else {
                             showNotification(`User not found`);
                         }
                     })
                     .catch((error) => {
-                        showNotification(`User not found`);
+                        console.error('Error getting users:', error);
                     });
             })
             .catch((error) => {
-                showNotification(`User not found`);
+                if (error.response && error.response.data) {
+                    showNotification(error.response.data.message || 'Error creating user');
+                } else {
+                    console.error('Error creating user:', error);
+                    showNotification('Error creating user');
+                }
             });
-    })
+    });    
+
+    $('#loginBtn').on('click', () => {
+        axios.post(`/auth/login`, {
+            login: $('#loginInput').val(),
+            password: $('#passwordInput').val()
+        })
+        .then((res) => {
+            const { token, refreshToken } = res.data;
+            localStorage.setItem('token', token);
+            localStorage.setItem('refreshToken', refreshToken);
+    
+            return axios.get('/allUsers');
+        })
+        .then((res) => {
+            const login = $('#loginInput').val();
+            const User = res.data.find(el => el.login === login);
+    
+            if (User) {
+                $.cookie('userToken', User._id, { path: '/' });
+                window.location.href = '/chats';
+                $('#loginInput').val('');
+                $('#passwordInput').val('');
+            } else {
+                showNotification(`User not found`);
+            }
+        })
+        .catch((error) => {
+            console.error('Error during login or fetching users:', error);
+            showNotification(`Login failed: ${error.response ? error.response.data : 'Unknown error'}`);
+        });
+    });    
 
     function showNotification(message) {
         $(`.notificationContainer`).css('display', 'flex');

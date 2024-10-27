@@ -1,18 +1,21 @@
 const socket = io();
 let userId = $.cookie('userToken');
 let nameUser;
-
 axios.get('/allUsers')
     .then((res) => {
-        nameUser = res.data.find(el => el._id === userId).login;
+        const user = res.data.find(el => el._id === userId);
+        if (user) {
+            nameUser = user.login;
+        } else {
+            console.log('User not found for ID:', userId);
+        }
     })
     .catch((err) => {
-        console.log(err);
+        console.log('Error fetching users:', err);
     });
 
-let chatToken = $.cookie('chatToken') || 'mainChat';
 
-authorisationCheck(userId);
+let chatToken = $.cookie('chatToken') || 'mainChat';
 
 $('.sendMessageContainer').on('submit', (e) => {
     e.preventDefault();
@@ -67,17 +70,54 @@ socket.on('connectionUsers', (connectionUsers) => {
     $(`.usersOnline`).text(`Online ${connectionUsers}`);
 });
 
-function authorisationCheck(id) {
-    axios.get('/allUsers')
-        .then((res) => {
-            const user = res.data.find(el => el._id === id);
-            if (!user) {
-                window.location.href = '/auth';
-            } else {
-                nameUser = user.login;
+function checkAuthorisation() {
+    const token = localStorage.getItem('token');
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    console.log(token, refreshToken);
+
+    if (!token || !refreshToken) {
+        window.location.href = '/auth';
+        return;
+    }
+
+    axios.get(`/protected`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+    .then((res) => {
+        console.log(res);
+
+        if (window.location.pathname !== '/chats') {
+            window.location.href = '/chats';
+        }
+    })
+    .catch((err) => {
+        axios.get(`/refresh`, {
+            headers: {
+                'refresh-token': `Bearer ${refreshToken}`
             }
+        })
+        .then((res) => {
+            console.log(res);
+            localStorage.setItem('token', res.data.token); 
+            localStorage.setItem('refreshToken', res.data.refreshToken);
+
+            if (window.location.pathname !== '/chats') {
+                window.location.href = '/chats';
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '/auth';
         });
+    });
 }
+
+checkAuthorisation ()
 
 function getUserNameById(id, callback) {
     axios.get('/allUsers')

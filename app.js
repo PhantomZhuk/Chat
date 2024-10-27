@@ -12,7 +12,7 @@ const multer = require('multer');
 const passport = require("passport");
 const session = require("express-session");
 const localStrategy = require("passport-local").Strategy;
-const bycrypt = require("bcryptjs");
+const bcrypt = require('bcrypt');
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
@@ -22,6 +22,9 @@ const nodemailer = require("nodemailer");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(`public`));
+
+const SECRET_KEY = process.env.SECRET_KEY;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -85,23 +88,67 @@ app.post(`/auth/createUser`, (req, res) => {
     const { login, password, email, code } = req.body;
     if (login && password) {
         if (code === randomCode) {
-            const newUser = new User({ 
-                login, 
-                password, 
-                email, 
-                filename: 'user-icon-on-transparent-background-free-png.webp', 
-                path: 'uploads/user-icon-on-transparent-background-free-png.webp', 
-                uploadDate: Date.now() 
+            const newUser = new User({
+                login,
+                password: bcrypt.hashSync(password, 10),
+                email,
+                filename: 'user-icon-on-transparent-background-free-png.webp',
+                path: 'uploads/user-icon-on-transparent-background-free-png.webp',
+                uploadDate: Date.now()
             });
             newUser.save();
-            res.sendStatus(201);
+            const token = jwt.sign({ login: login }, SECRET_KEY, { expiresIn: "1h" });
+            const refreshToken = jwt.sign({ login: login }, REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+            res.json({ token, refreshToken });
         } else {
-            res.sendStatus(401);
+            res.json({ message: 'Wrong code' });
         }
     } else {
         res.sendStatus(500);
     }
 })
+function authenticateToken(req, res, next) {
+    const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+
+    jwt.verify(token, SECRET_KEY, (err, user) => {
+        if (err) {
+            console.error('Token verification error:', err);
+            return res.status(403).json({ message: 'Invalid or expired token' });
+        }
+
+        req.user = user;
+        next();
+    });
+}
+
+app.get('/protected', authenticateToken, (req, res) => {
+    res.json({ message: 'This is a secure route', user: req.user });
+});
+
+app.get('/refresh', (req, res) => {
+    const refreshToken = req.headers['refresh-token']?.split(' ')[1];
+
+    if (!refreshToken) {
+        return res.status(401).json({ message: "No refresh token provided" });
+    }
+
+    jwt.verify(refreshToken, REFRESH_TOKEN_SECRET, (err, user) => {
+        if (err) {
+            console.error('Refresh token verification error:', err);
+            return res.status(403).json({ message: "Invalid refresh token" });
+        }
+
+        const newToken = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: "10s" });
+        const newRefreshToken = jwt.sign({ id: user.id, username: user.username }, REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+
+        res.json({ token: newToken, refreshToken: newRefreshToken });
+    });
+});
+
 
 app.post('/auth/login', async (req, res) => {
     const { login, password } = req.body;
@@ -110,17 +157,23 @@ app.post('/auth/login', async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ login, password });
+        const user = await User.findOne({ login });
+        
+        if (!user) {
+            return res.sendStatus(401);
+        }
 
-        if (user) {
-            res.sendStatus(200);
+        if (bcrypt.compareSync(password, user.password)) {
+            const token = jwt.sign({ login: login }, SECRET_KEY, { expiresIn: "1h" });
+            const refreshToken = jwt.sign({ login: login }, REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+            return res.json({ token, refreshToken });
         } else {
-            res.sendStatus(401);
+            return res.sendStatus(401);
         }
 
     } catch (err) {
         console.error(err);
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
 });
 
