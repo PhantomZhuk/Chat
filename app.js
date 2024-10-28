@@ -143,12 +143,10 @@ app.get('/refresh', (req, res) => {
         }
 
         const newToken = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: "10s" });
-        const newRefreshToken = jwt.sign({ id: user.id, username: user.username }, REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
 
-        res.json({ token: newToken, refreshToken: newRefreshToken });
+        res.json({ token: newToken});
     });
 });
-
 
 app.post('/auth/login', async (req, res) => {
     const { login, password } = req.body;
@@ -158,7 +156,7 @@ app.post('/auth/login', async (req, res) => {
 
     try {
         const user = await User.findOne({ login });
-        
+
         if (!user) {
             return res.sendStatus(401);
         }
@@ -199,7 +197,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/uploadUserIcon', upload.single('file'), (req, res) => {
 
     if (!req.file) {
         return res.status(400).send('No file uploaded');
@@ -251,12 +249,16 @@ io.on('connection', (socket) => {
     io.emit('connectionUsers', connectionUsers);
 
     socket.on('chat message', (data) => {
-        const { message, userId, chatId } = data;
-        console.log(chatId);
+        const { message, userId, chatId } = data;;
         if (chatId === `mainChat`) {
             mainChat.create({ message, userId, chatId });
         } else {
-            Messages.create({ message, userId, chatId });
+            for (let chat of Chats.find({ _id: chatId })) {
+                chat.messages.push({
+                    message, 
+                    userId
+                });
+            }
         }
         socket.emit('My message', { message, userId, chatId });
         socket.broadcast.emit('Other message', { message, userId, chatId });
@@ -279,35 +281,55 @@ app.get(`/mainChatMessages`, async (req, res) => {
     }
 })
 
-const chat = new mongoose.Schema({
-    nameChat: String
+const chatShema = new mongoose.Schema({
+    nameChat: String,
+    filename: String,
+    path: String,
+    uploadDate: { type: Date, default: Date.now },
+    admin: String,
+    chatType: String,
+    users: [String],
+    messages: [String]
 })
 
-const Chats = mongoose.model("chats", chat);
+const Chats = mongoose.model("chats", chatShema);
 
-app.post(`/createChat`, (req, res) => {
-    const { nameChat, userId } = req.body;
+app.post(`/createChat`, upload.single('file'), (req, res) => {
+    const { nameChat, userId, chatType } = req.body;
+    const file = req.file;
+
     if (!nameChat) {
         return res.status(400).send('Missing nameChat');
     }
 
-    const newChat = new Chats({ nameChat });
+    const filename = file ? file.filename : 'none';
+    const path = file ? file.path : 'none';
+
+    const newChat = new Chats({ 
+        nameChat, 
+        chatType, 
+        admin: userId, 
+        filename, 
+        path 
+    });
+
     newChat.save()
-        .then((savedChat) => {
-            return User.findByIdAndUpdate(
-                userId,
-                { $push: { chats: savedChat._id } },
-                { new: true }
-            );
-        })
-        .then(() => {
-            res.sendStatus(201);
-        })
-        .catch((err) => {
-            console.error(err);
-            res.status(500).send('Error creating chat or updating user');
-        });
-})
+    .then((savedChat) => {
+        return User.findByIdAndUpdate(
+            userId,
+            { $push: { chats: savedChat._id } },
+            { new: true }
+        );
+    })
+    .then(() => {
+        res.sendStatus(201);
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error creating chat or updating user');
+    });
+});
+
 
 app.post(`/createUserChat`, (req, res) => {
     const { nameChat, usersId } = req.body;
@@ -336,7 +358,6 @@ app.post(`/createUserChat`, (req, res) => {
             res.status(500).send('Error creating chat or updating users');
         });
 });
-
 
 app.post(`/addChatToUser`, (req, res) => {
     const { userId, chatId } = req.body;
@@ -379,23 +400,23 @@ app.put(`/chats/:id`, async (req, res) => {
     }
 })
 
-const message = new mongoose.Schema({
-    message: String,
-    chatId: String,
-    userId: String
-})
+// const message = new mongoose.Schema({
+//     message: String,
+//     chatId: String,
+//     userId: String
+// })
 
-const Messages = mongoose.model("messages", message);
+// const Messages = mongoose.model("messages", message);
 
-app.get(`/messages`, async (req, res) => {
-    try {
-        const messages = await Messages.find();
-        res.send(messages);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error');
-    }
-})
+// app.get(`/messages`, async (req, res) => {
+//     try {
+//         const messages = await Messages.find();
+//         res.send(messages);
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// })
 
 server.listen(PORT, () => {
     console.log(`listening on ${PORT}`);

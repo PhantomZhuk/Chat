@@ -67,12 +67,29 @@
         </div>
     </div>
 
+    <div class="changeChatImgContainer">
+        <div class="title">
+            Change chat image
+            <i class="fa-solid fa-xmark closeChatImgBtn"></i>
+        </div>
+        <div class="changeChatImg">
+            <input type="file" id="changeChatImgInput">
+            <div class="drag-and-drop" id="drag-and-dropChat">Drag and drop your file here or click to select</div>
+        </div>
+    </div>
+
     <div class="addChatContainer">
         <div class="title">
             <i class="fa-solid fa-xmark closeAddChatBtn"></i>
         </div>
+        <div class="chatIconConatiner">
+            <div class="newChatIcon" id="newChatIcon"></div>
+            <div class="openChangeChatImg"><i class="fa-solid fa-camera"></i></div>
+        </div>
         <input type="text" class="addChatInput" id="addChatInput" placeholder="Enter chat name...">
         <div class="btnContainer">
+            <i class="fa-regular fa-square" id="makeChatPrivateBtn"></i>
+            <p>Make chat private</p>
             <button id="addChatBtn">Add chat</button>
         </div>
     </div>

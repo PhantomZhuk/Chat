@@ -74,8 +74,6 @@ function checkAuthorisation() {
     const token = localStorage.getItem('token');
     const refreshToken = localStorage.getItem('refreshToken');
 
-    console.log(token, refreshToken);
-
     if (!token || !refreshToken) {
         window.location.href = '/auth';
         return;
@@ -86,38 +84,36 @@ function checkAuthorisation() {
             Authorization: `Bearer ${token}`
         }
     })
-    .then((res) => {
-        console.log(res);
-
-        if (window.location.pathname !== '/chats') {
-            window.location.href = '/chats';
-        }
-    })
-    .catch((err) => {
-        axios.get(`/refresh`, {
-            headers: {
-                'refresh-token': `Bearer ${refreshToken}`
-            }
-        })
         .then((res) => {
             console.log(res);
-            localStorage.setItem('token', res.data.token); 
-            localStorage.setItem('refreshToken', res.data.refreshToken);
 
             if (window.location.pathname !== '/chats') {
                 window.location.href = '/chats';
             }
         })
         .catch((err) => {
-            console.log(err);
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            window.location.href = '/auth';
+            axios.get(`/refresh`, {
+                headers: {
+                    'refresh-token': `Bearer ${refreshToken}`
+                }
+            })
+                .then((res) => {
+                    localStorage.setItem('token', res.data.token);
+
+                    if (window.location.pathname !== '/chats') {
+                        window.location.href = '/chats';
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refreshToken');
+                    window.location.href = '/auth';
+                });
         });
-    });
 }
 
-checkAuthorisation ()
+checkAuthorisation()
 
 function getUserNameById(id, callback) {
     axios.get('/allUsers')
@@ -307,7 +303,7 @@ function handleFile(file, userId) {
     formData.append('file', file);
     formData.append('userId', userId);
 
-    axios.post('/upload', formData, {
+    axios.post('/uploadUserIcon', formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
@@ -333,7 +329,6 @@ function showProfile(userId) {
                     .replace('public\\', './')
                     .replace(/\\/g, '/');
 
-                console.log(transformedPath);
                 $('#profileImg').css('background-image', `url(${transformedPath})`);
                 $('#accountIcon').css('background-image', `url(${transformedPath})`);
                 $('.profileName').text(user.login);
@@ -412,18 +407,23 @@ function notification(notification) {
     }, 3000);
 }
 
-function createChat(nameChat, userId) {
-    axios.post(`/createChat`, { nameChat, userId })
+function createChat(nameChat, userId, chatType, file) {
+    const formData = new FormData();
+    formData.append('nameChat', nameChat);
+    formData.append('userId', userId);
+    formData.append('chatType', chatType);
+    if (file) formData.append('file', file);
+
+    axios.post(`/createChat`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    })
         .then((res) => {
-            console.log(res);
             notification(`Chat ${nameChat} created`);
             $(`.addChatContainer`).css(`display`, `none`);
             $(`.wrap`).css(`filter`, `brightness(1)`);
-            showChats()
+            showChats();
         })
-        .catch((error) => {
-            console.log(error);
-        });
+        .catch((error) => console.log(error));
 }
 
 $(`.addChatBtn`).click(() => {
@@ -439,32 +439,110 @@ $(`.closeAddChatBtn`).click(() => {
     $(`.wrap`).css(`filter`, `brightness(1)`);
 })
 
+$(`#addChatInput`).on(`input`, () => {
+    if ($(`#newChatIcon`).css(`background-image`) !== 'none' && $(`#newChatIcon`).css(`background-image`) !== '') {
+        $(`#newChatIcon`).text(``);
+    } else {
+        if ($(`#addChatInput`).val().length > 0) {
+            $(`#newChatIcon`).text($(`#addChatInput`).val()[0].toUpperCase());
+        } else {
+            $(`#newChatIcon`).text(``);
+        }
+    }
+})
+
+let chatType = `public`;
+$(`#makeChatPrivateBtn`).click(() => {
+    if ($(`#makeChatPrivateBtn`).hasClass('fa-square')) {
+        $(`#makeChatPrivateBtn`).removeClass('fa-square');
+        $(`#makeChatPrivateBtn`).addClass('fa-square-check');
+        chatType = `private`;
+    } else if ($(`#makeChatPrivateBtn`).hasClass('fa-square-check')) {
+        $(`#makeChatPrivateBtn`).removeClass('fa-square-check');
+        $(`#makeChatPrivateBtn`).addClass('fa-square');
+        chatType = `public`;
+    }
+})
+
+$(`.openChangeChatImg`).click(() => {
+    $(`.changeChatImgContainer`).css(`display`, `flex`);
+    $(`.addChatContainer`).css(`display`, `none`);
+})
+
+let file;
+
+$(`#drag-and-dropChat`).click(() => {
+    $(`#changeChatImgInput`).click();
+});
+
+$(`#drag-and-dropChat`).on('dragover', (e) => {
+    e.preventDefault();
+});
+
+$(`#drag-and-dropChat`).on('drop', (e) => {
+    e.preventDefault();
+    file = e.originalEvent.dataTransfer.files[0];
+
+    if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            $(`.changeChatImgContainer`).css(`display`, `none`);
+            $(`.addChatContainer`).css(`display`, `flex`);
+            $(`.newChatIcon`).css(`background-image`, `url(${event.target.result})`);
+        };
+        reader.readAsDataURL(file);
+        $(`#newChatIcon`).text(``);
+    } else {
+        console.log("Будь ласка, виберіть файл зображення.");
+    }
+});
+
+$(`#changeChatImgInput`).on('change', function () {
+    file = this.files[0];
+    console.log(file);
+    if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            $(`.changeChatImgContainer`).css(`display`, `none`);
+            $(`.addChatContainer`).css(`display`, `flex`);
+            $(`.newChatIcon`).css(`background-image`, `url(${event.target.result})`);
+        };
+        reader.readAsDataURL(file);
+        $(`#newChatIcon`).text(``);
+    } else {
+        console.log("Будь ласка, виберіть файл зображення.");
+    }
+});
+
+$(`.closeChatImgBtn`).click(() => {
+    $(`.changeChatImgContainer`).css(`display`, `none`);
+    $(`.wrap`).css(`filter`, `brightness(1)`);
+})
+
 $(`#addChatBtn`).click(() => {
     axios.get(`/chats`)
         .then(res => {
-            console.log(res);
+            console.log(res.data);
             let chatCreated = false;
-            for (let chat of res.data) {
-                if (chat.chatName === $('#addChatInput').val()) {
-                    chatCreated = true;
-                }
+
+            if (Array.isArray(res.data)) {
+                chatCreated = res.data.some(chat => chat.chatName === $('#addChatInput').val());
+            } else {
+                console.error('Expected an array but got:', res.data);
             }
 
-            if (!chatCreated) {
-                if ($('#addChatInput').val().length > 27) {
-                    notification(`Chat name is too long`);
-                } else {
-                    createChat($('#addChatInput').val(), userId);
-                    $(`#addChatInput`).val(``);
-                }
-            } else {
+            if (chatCreated) {
                 notification(`Chat ${$('#addChatInput').val()} already exists`);
+            } else if ($('#addChatInput').val().length > 27) {
+                notification(`Chat name is too long`);
+            } else {
+                createChat($('#addChatInput').val(), userId, chatType, file);
+                $(`#addChatInput`).val(``);
             }
         })
-        .catch(err => {
-            console.log(err);
-        })
-})
+        .catch(err => console.log(err));
+});
+
 
 function showChats() {
     axios.get(`allUsers`)
@@ -490,13 +568,27 @@ function showChats() {
                                                 </div>
                                             `);
                                         } else {
-                                            let chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
-                                            $('.chatContainer').append(`
-                                                <div class="chat" id="${chat._id}">
-                                                    <p class="chatIcon" id="${chat._id}">${chatIcon}</p>
-                                                    <p class="chatName" id="${chat._id}">${chat.nameChat}</p>
-                                                </div>
-                                            `);
+                                            let chatIcon;
+                                            if (chat.filename == `none`) {
+                                                chatIcon = chat.nameChat.slice(0, 1).toUpperCase();
+                                                $('.chatContainer').append(`
+                                                    <div class="chat" id="${chat._id}">
+                                                        <p class="chatIcon" id="${chat._id}">${chatIcon}</p>
+                                                        <p class="chatName" id="${chat._id}">${chat.nameChat}</p>
+                                                    </div>
+                                                `);
+                                            } else {
+                                                const chatIcon = chat.path
+                                                    .replace('public\\', './')
+                                                    .replace(/\\/g, '/');
+                                                $('.chatContainer').append(`
+                                                    <div class="chat" id="${chat._id}">
+                                                        <p class="chatIcon" id="${chat._id}" style="background-image: url(${chatIcon})"></p>
+                                                        <p class="chatName" id="${chat._id}">${chat.nameChat}</p>
+                                                    </div>
+                                                `);
+                                            }
+
                                         }
                                     }
                                 }
