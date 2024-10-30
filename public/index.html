@@ -1,155 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chat</title>
+        <link rel="stylesheet" href="./style.css" />
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js"
+            integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw=="
+            crossorigin="anonymous"
+        ></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.js"
+            integrity="sha512-luUnkeG+uabiT2pZdi5ME5uADvq+FpDs2fK5V0nVXrHCND9F077fKaE9W//oJvGnWSmwQmCau63A6s3um1NZmg=="
+            crossorigin="anonymous"
+        ></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.css"
+            integrity="sha512-8BU3emz11z9iF75b10oPjjpamM4Mz23yQFQymbtwyPN3mNWHxpgeqyrYnkIUP6A8KyAj5k2p3MiYLtYqew7gIw=="
+            crossorigin="anonymous"
+        />
+        <link
+            href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,regular,500,600,700,800,900,100italic,200italic,300italic,italic,500italic,600italic,700italic,800italic,900italic"
+            rel="stylesheet"
+        />
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"
+            integrity="sha512-aUhL2xOCrpLEuGD5f6tgHbLYEXRpYZ8G5yD+WlFrXrPy2IrWBlu6bih5C9H6qGsgqnU6mgx6KtU8TreHpASprw=="
+            crossorigin="anonymous"
+        ></script>
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat</title>
-    <link rel="stylesheet" href="./style.css">
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js'
-        integrity='sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw=='
-        crossorigin='anonymous'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.js'
-        integrity='sha512-luUnkeG+uabiT2pZdi5ME5uADvq+FpDs2fK5V0nVXrHCND9F077fKaE9W//oJvGnWSmwQmCau63A6s3um1NZmg=='
-        crossorigin='anonymous'></script>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.css'
-        integrity='sha512-8BU3emz11z9iF75b10oPjjpamM4Mz23yQFQymbtwyPN3mNWHxpgeqyrYnkIUP6A8KyAj5k2p3MiYLtYqew7gIw=='
-        crossorigin='anonymous' />
-    <link
-        href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,regular,500,600,700,800,900,100italic,200italic,300italic,italic,500italic,600italic,700italic,800italic,900italic"
-        rel="stylesheet" />
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js'
-        integrity='sha512-aUhL2xOCrpLEuGD5f6tgHbLYEXRpYZ8G5yD+WlFrXrPy2IrWBlu6bih5C9H6qGsgqnU6mgx6KtU8TreHpASprw=='
-        crossorigin='anonymous'></script>
-</head>
-
-<body>
-
-    <div class="profileContainer">
-        <div class="profileHeader">
-            <i class="fa-solid fa-xmark closeProfileBtn"></i>
-        </div>
-        <div class="profileImgContainer">
-            <div class="profileImg" id="profileImg"></div>
-            <div class="openChangeProfileImg"><i class="fa-solid fa-camera"></i></div>
-        </div>
-        <div class="profileNameContainer">
-            <div class="name">
-                <i class="fa-regular fa-circle-user"></i>
-                <p>Name</p>
+    <body>
+        <div class="profileContainer">
+            <div class="profileHeader">
+                <i class="fa-solid fa-xmark closeProfileBtn"></i>
             </div>
-            <div class="profileName openChangeNameContainer">User</div>
-        </div>
-        <div class="btnContainer">
-            <button class="signOutBtn">Sign out</button>
-        </div>
-    </div>
-
-    <div class="changeNameContainer">
-        <div class="title">
-            Change name
-        </div>
-        <input type="text" class="changeNameInput" id="changeNameInput" placeholder="Enter new name...">
-        <div class="btnContainer">
-            <button id="cancelNameBtn">Cancel</button>
-            <button id="changeNameBtn">Change</button>
-        </div>
-    </div>
-
-    <div class="changeProfileImgContainer">
-        <div class="title">
-            Change profile image
-            <i class="fa-solid fa-xmark closeImgBtn"></i>
-        </div>
-        <div class="changeProfileImg">
-            <input type="file" id="changeProfileImgInput">
-            <div class="selectFile drag-and-drop">Drag and drop your file here or click to select</div>
-        </div>
-    </div>
-
-    <div class="changeChatImgContainer">
-        <div class="title">
-            Change chat image
-            <i class="fa-solid fa-xmark closeChatImgBtn"></i>
-        </div>
-        <div class="changeChatImg">
-            <input type="file" id="changeChatImgInput">
-            <div class="drag-and-drop" id="drag-and-dropChat">Drag and drop your file here or click to select</div>
-        </div>
-    </div>
-
-    <div class="addChatContainer">
-        <div class="title">
-            <i class="fa-solid fa-xmark closeAddChatBtn"></i>
-        </div>
-        <div class="chatIconConatiner">
-            <div class="newChatIcon" id="newChatIcon"></div>
-            <div class="openChangeChatImg"><i class="fa-solid fa-camera"></i></div>
-        </div>
-        <input type="text" class="addChatInput" id="addChatInput" placeholder="Enter chat name...">
-        <div class="btnContainer">
-            <i class="fa-regular fa-square" id="makeChatPrivateBtn"></i>
-            <p>Make chat private</p>
-            <button id="addChatBtn">Add chat</button>
-        </div>
-    </div>
-
-    <div class="notificationContainer">
-        <div class="notificationText"></div>
-    </div>
-
-    <div class="wrap">
-        <header>
-            <div class="menuBtnContainer">
-                <div class="accountContainer">
-                    <div class="accountIcon" id="accountIcon"></div>
-                    <div class="accountName"></div>
-                </div>
-                <i class="fa-solid fa-bars" id="MenuBtn"></i>
-            </div>
-            <div class="searchContainer">
-                <input type="text" id="searchInput" placeholder="Search...">
-                <i class="fa-solid fa-magnifying-glass openMenu" id="searchBtn"></i>
-            </div>
-            <div class="searchChatContainer">
-                
-            </div>
-            <div class="mainChatContainer">
-                <div class="mainChat">
-                    <p class="mainChatIcon">Main</p>
-                    <p class="mainChatName">Main</p>
-                </div>
-                <div class="chatContainer">
-                </div>
-                <div class="addChatBtn">
-                    <i class="fa-solid fa-plus"></i>
+            <div class="profileImgContainer">
+                <div class="profileImg" id="profileImg"></div>
+                <div class="openChangeProfileImg">
+                    <i class="fa-solid fa-camera"></i>
                 </div>
             </div>
-            <div class="settingBtn">
-                <div class="custom-loader"></div>
-                <p class="settingsText">Settings</p>
+            <div class="profileNameContainer">
+                <div class="name">
+                    <i class="fa-regular fa-circle-user"></i>
+                    <p>Name</p>
+                </div>
+                <div class="profileName openChangeNameContainer">User</div>
             </div>
-        </header>
-        <main>
-            <div class="header">
-                <div class="mainInfoChat">
-                    <div class="nameChat">Main caht</div>
-                    <div class="usersOnline">Online 1</div>
+            <div class="btnContainer">
+                <button class="signOutBtn">Sign out</button>
+            </div>
+        </div>
+
+        <div class="changeNameContainer">
+            <div class="title">Change name</div>
+            <input
+                type="text"
+                class="changeNameInput"
+                id="changeNameInput"
+                placeholder="Enter new name..."
+            />
+            <div class="btnContainer">
+                <button id="cancelNameBtn">Cancel</button>
+                <button id="changeNameBtn">Change</button>
+            </div>
+        </div>
+
+        <div class="changeProfileImgContainer">
+            <div class="title">
+                Change profile image
+                <i class="fa-solid fa-xmark closeImgBtn"></i>
+            </div>
+            <div class="changeProfileImg">
+                <input type="file" id="changeProfileImgInput" />
+                <div class="selectFile drag-and-drop">
+                    Drag and drop your file here or click to select
                 </div>
             </div>
-            <div class="messageContainer"></div>
-            <form action="" class="sendMessageContainer">
-                <input type="text" id="sendMessageInput" placeholder="Enter message..." autocomplete="off">
-                <button id="sendMessageBtn"><i class="fa-solid fa-paper-plane"></i></button>
-            </form>
-        </main>
-    </div>
+        </div>
 
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js'
-        integrity='sha512-luMnTJZ7oEchNDZAtQhgjomP1eZefnl82ruTH/3Oj/Yu5qYtwL7+dVRccACS/Snp1lFXq188XFipHKYE75IaQQ=='
-        crossorigin='anonymous'></script>
-    <script defer src="main.js">
-    </script>
-</body>
+        <div class="changeChatImgContainer">
+            <div class="title">
+                Change chat image
+                <i class="fa-solid fa-xmark closeChatImgBtn"></i>
+            </div>
+            <div class="changeChatImg">
+                <input type="file" id="changeChatImgInput" />
+                <div class="drag-and-drop" id="drag-and-dropChat">
+                    Drag and drop your file here or click to select
+                </div>
+            </div>
+        </div>
 
+        <div class="addChatContainer">
+            <div class="title">
+                <i class="fa-solid fa-xmark closeAddChatBtn"></i>
+            </div>
+            <div class="chatIconConatiner">
+                <div class="newChatIcon" id="newChatIcon"></div>
+                <div class="openChangeChatImg">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+            </div>
+            <input
+                type="text"
+                class="addChatInput"
+                id="addChatInput"
+                placeholder="Enter chat name..."
+            />
+            <div class="btnContainer">
+                <i class="fa-regular fa-square" id="makeChatPrivateBtn"></i>
+                <p>Make chat private</p>
+                <button id="addChatBtn">Add chat</button>
+            </div>
+        </div>
+
+        <div class="notificationContainer">
+            <div class="notificationText"></div>
+        </div>
+
+        <div class="wrap">
+            <header>
+                <div class="menuBtnContainer">
+                    <div class="accountContainer">
+                        <div class="accountIcon" id="accountIcon"></div>
+                        <div class="accountName"></div>
+                    </div>
+                    <i class="fa-solid fa-bars" id="MenuBtn"></i>
+                </div>
+                <div class="searchContainer">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search..."
+                    />
+                    <i
+                        class="fa-solid fa-magnifying-glass openMenu"
+                        id="searchBtn"
+                    ></i>
+                </div>
+                <div class="searchChatContainer"></div>
+                <div class="mainChatContainer">
+                    <div class="mainChat">
+                        <p class="mainChatIcon">Main</p>
+                        <p class="mainChatName">Main</p>
+                    </div>
+                    <div class="chatContainer"></div>
+                    <div class="addChatBtn">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                </div>
+                <div class="settingBtn">
+                    <div class="custom-loader"></div>
+                    <p class="settingsText">Settings</p>
+                </div>
+            </header>
+            <main>
+                <div class="header">
+                    <div class="mainInfoChat">
+                        <div class="nameChat">Main Chat</div>
+                        <div class="usersOnline" id="users">Online 1</div>
+                    </div>
+                </div>
+                <div class="messageContainer"></div>
+                <div class="sendMessageContainer">
+                    <div class="joinChatContainer joinChatBtn">
+                        <div class="joinChatBtn">Join a chat</div>
+                    </div>
+                    <form action="" class="sendMessageForm">
+                        <input
+                            type="text"
+                            id="sendMessageInput"
+                            placeholder="Enter message..."
+                            autocomplete="off"
+                        />
+                        <button id="sendMessageBtn">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </main>
+        </div>
+
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"
+            integrity="sha512-luMnTJZ7oEchNDZAtQhgjomP1eZefnl82ruTH/3Oj/Yu5qYtwL7+dVRccACS/Snp1lFXq188XFipHKYE75IaQQ=="
+            crossorigin="anonymous"
+        ></script>
+        <script defer src="main.js"></script>
+    </body>
 </html>
