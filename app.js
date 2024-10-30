@@ -248,24 +248,32 @@ io.on('connection', (socket) => {
     socket.on('chat message', async (data) => {
         const { message, userId, chatId } = data;
 
-        if (chatId === 'mainChat') {
-            await mainChat.create({ message, userId, chatId });
-        } else {
-            try {
+        if (!message || !userId || !chatId) {
+            socket.emit('error', 'Повідомлення, userId або chatId не вказані');
+            return;
+        }
+
+        try {
+            if (chatId === 'mainChat') {
+                await mainChat.create({ message, userId, chatId });
+            } else {
                 const chat = await Chats.findById(chatId);
                 if (chat) {
                     chat.messages.push({ message, userId });
                     await chat.save();
                 } else {
                     console.error(`Чат з ID ${chatId} не знайдено`);
+                    socket.emit('error', `Чат з ID ${chatId} не знайдено`);
+                    return;
                 }
-            } catch (error) {
-                console.error('Помилка при оновленні чату:', error);
             }
-        }
 
-        socket.to(chatId).emit('Other message', { message, userId, chatId });
-        socket.emit('My message', { message, userId, chatId });
+            socket.to(chatId).emit('Other message', { message, userId, chatId });
+            socket.emit('My message', { message, userId, chatId });
+        } catch (error) {
+            console.error('Помилка при оновленні чату:', error);
+            socket.emit('error', 'Виникла помилка при обробці повідомлення');
+        }
     });
 
     socket.on('disconnect', () => {
@@ -273,6 +281,30 @@ io.on('connection', (socket) => {
         connectionUsers--;
         io.emit('connectionUsers', connectionUsers);
     });
+});
+
+app.post(`/createMessage`, async (req, res) => {
+    const { message, userId, chatId } = req.body;
+    if (!message || !userId || !chatId) {
+        return res.status(400).send('Missing message, userId, or chatId');
+    }
+    
+    try {
+        const chat = await Chats.findById(chatId);
+        if (chat) {
+            const newMessage = { message, userId };
+            chat.messages.push(newMessage);
+            await chat.save();
+            const messageId = chat.messages[chat.messages.length - 1]._id;
+            res.send({ messageId });
+        } else {
+            console.error(`Чат з ID ${chatId} не знайдено`);
+            res.status(404).send('Чат не знайдено');
+        }
+    } catch (error) {
+        console.error('Помилка при оновленні чату:', error);
+        res.status(500).send('Внутрішня помилка сервера');
+    }
 });
 
 
@@ -461,6 +493,36 @@ app.put(`/chats/:id`, async (req, res) => {
     }
 })
 
+app.delete(`/deleteChats/:id`, async (req, res) => {
+    try {
+        const { chatId } = req.body;
+        if (!chatId) {
+            return res.status(400).send('Missing chatId');
+        }
+
+        await Chats.findByIdAndDelete(chatId);
+        res.sendStatus(200);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+app.post(`/deleteMessages`, async (req, res) => {
+    console.log(req.body);
+    try {
+        const { messageId, chatId } = req.body;
+        if (!messageId) {
+            return res.status(400).send('Missing messageId');
+        }
+
+        await Chats.findByIdAndUpdate(chatId, { $pull: { messages: { _id: messageId } } });
+        res.sendStatus(200);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 
 server.listen(PORT, () => {

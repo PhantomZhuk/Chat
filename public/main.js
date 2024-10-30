@@ -315,25 +315,36 @@ $(".sendMessageContainer").on("submit", (e) => {
 });
 
 socket.on("My message", (data) => {
-    axios
-        .get(`/allUsers`)
+    axios.get(`/allUsers`)
         .then((res) => {
             const user = res.data.find((el) => el._id === userId);
             if (user) {
-                const transformedPath = user.path
-                    .replace("public\\", "./")
-                    .replace(/\\/g, "/");
-                appendMessage(
-                    "myMessage",
-                    nameUser,
-                    data.message,
-                    transformedPath,
-                    localStorage.getItem("chatToken")
-                );
-                $(".messageContainer").animate(
-                    { scrollTop: $(".messageContainer").prop("scrollHeight") },
-                    "slow"
-                );
+                axios.post(`/createMessage`, {
+                    message: data.message,
+                    userId: userId,
+                    chatId: localStorage.getItem("chatToken"),
+                })
+                .then((res) => {
+                    const messageId = res.data.messageId; 
+                    const transformedPath = user.path
+                        .replace("public\\", "./")
+                        .replace(/\\/g, "/");
+                    appendMessage(
+                        "myMessage",
+                        nameUser,
+                        data.message,
+                        transformedPath,
+                        localStorage.getItem("chatToken"),
+                        messageId 
+                    );
+                    $(".messageContainer").animate(
+                        { scrollTop: $(".messageContainer").prop("scrollHeight") },
+                        "slow"
+                    );
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
             }
         })
         .catch((err) => {
@@ -341,9 +352,9 @@ socket.on("My message", (data) => {
         });
 });
 
+
 socket.on("Other message", (data) => {
-    axios
-        .get(`/allUsers`)
+    axios.get(`/allUsers`)
         .then((res) => {
             const user = res.data.find((el) => el._id === data.userId);
             if (user) {
@@ -356,7 +367,8 @@ socket.on("Other message", (data) => {
                         userName,
                         data.message,
                         transformedPath,
-                        data.chatId
+                        data.chatId,
+                        data.messageId
                     );
                     $(".messageContainer").animate(
                         { scrollTop: $(".messageContainer").prop("scrollHeight") },
@@ -369,6 +381,7 @@ socket.on("Other message", (data) => {
             console.log(err);
         });
 });
+
 
 socket.on("connectionUsers", (connectionUsers) => {
     $(`.usersOnline`).text(`Online ${connectionUsers}`);
@@ -781,4 +794,28 @@ $(`#joinChatBtn`).click(() => {
         $(`.searchChatIcon`).css("margin", "0");
         $(`.searchChatName`).css("display", "none");
     }
+});
+
+$('.messageContainer').on('click', '.message', (e) => {
+    let ID = e.currentTarget.id;
+    axios.get('/Allchats')
+        .then((res) => {
+            for (let chat of res.data) {
+                if (chat._id === localStorage.getItem('chatToken')) {
+                    for (let message of chat.messages) {
+                        if (message._id === ID) {
+                            axios.post(`/deleteMessages`, { messageId: ID, chatId: localStorage.getItem('chatToken') })
+                                .then(() => {
+                                    showMessages(localStorage.getItem('chatToken'), userId);
+                                    notification('Повідомлення видалено'); // Використовуйте notification замість console.log
+                                })
+                                .catch((error) => {
+                                    notification('Помилка при видаленні повідомлення: ' + (error.response ? error.response.data : error.message));
+                                });
+                            return; // Додаємо return, щоб вийти з циклів
+                        }
+                    }
+                }
+            }
+        });
 });
