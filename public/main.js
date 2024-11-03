@@ -315,42 +315,72 @@ $(".sendMessageContainer").on("submit", (e) => {
 });
 
 socket.on("My message", (data) => {
-    axios.get("/allUsers")
+    axios.get(`/allUsers`)
         .then((res) => {
             const user = res.data.find((el) => el._id === userId);
             if (user) {
-                axios.post("/createMessage", {
+                axios.post(`/createMessage`, {
                     message: data.message,
                     userId: userId,
                     chatId: localStorage.getItem("chatToken"),
                 })
-                    .then((res) => {
-                        const messageId = res.data.messageId;
-                        const transformedPath = user.path.replace("public\\", "./").replace(/\\/g, "/");
-                        appendMessage("myMessage", nameUser, data.message, transformedPath, localStorage.getItem("chatToken"), messageId);
-                        $(".messageContainer").animate({ scrollTop: $(".messageContainer").prop("scrollHeight") }, "slow");
-                    })
-                    .catch((err) => console.log(err));
-            }
-        })
-        .catch((err) => console.log(err));
-});
-
-socket.on("Other message", (data) => {
-    axios.get("/allUsers")
-        .then((res) => {
-            const user = res.data.find((el) => el._id === data.userId);
-            if (user) {
-                const transformedPath = user.path.replace("public\\", "./").replace(/\\/g, "/");
-                getUserNameById(data.userId, (userName) => {
-                    appendMessage("otherMessage", userName, data.message, transformedPath, data.chatId, data.messageId);
-                    $(".messageContainer").animate({ scrollTop: $(".messageContainer").prop("scrollHeight") }, "slow");
+                .then((res) => {
+                    const messageId = res.data.messageId; 
+                    const transformedPath = user.path
+                        .replace("public\\", "./")
+                        .replace(/\\/g, "/");
+                    appendMessage(
+                        "myMessage",
+                        nameUser,
+                        data.message,
+                        transformedPath,
+                        localStorage.getItem("chatToken"),
+                        messageId 
+                    );
+                    $(".messageContainer").animate(
+                        { scrollTop: $(".messageContainer").prop("scrollHeight") },
+                        "slow"
+                    );
+                })
+                .catch((err) => {
+                    console.log(err);
                 });
             }
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
+
+socket.on("Other message", (data) => {
+    axios.get(`/allUsers`)
+        .then((res) => {
+            const user = res.data.find((el) => el._id === data.userId);
+            if (user) {
+                const transformedPath = user.path
+                    .replace("public\\", "./")
+                    .replace(/\\/g, "/");
+                getUserNameById(data.userId, (userName) => {
+                    appendMessage(
+                        "otherMessage",
+                        userName,
+                        data.message,
+                        transformedPath,
+                        data.chatId,
+                        data.messageId
+                    );
+                    $(".messageContainer").animate(
+                        { scrollTop: $(".messageContainer").prop("scrollHeight") },
+                        "slow"
+                    );
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+});
 
 
 socket.on("connectionUsers", (connectionUsers) => {
@@ -727,18 +757,7 @@ $(`.searchChatContainer`).on(`click`, `.searchChat`, (e) => {
     });
 });
 
-function joinToChat(chatToken, userId) {
-    axios.post(`/addChatToUser`, { chatId: chatToken, userId })
-        .then((res) => {
-            console.log(res.data);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-}
-
-$(`.joinChatBtn`).click(() => {
-    console.log("Joining to chat:", localStorage.getItem(`chatToken`));
+$(`#joinChatBtn`).click(() => {
     let chatToken = localStorage.getItem(`chatToken`);
     if (chatToken) {
         joinToChat(chatToken, userId);
@@ -788,37 +807,15 @@ $('.messageContainer').on('click', '.message', (e) => {
                             axios.post(`/deleteMessages`, { messageId: ID, chatId: localStorage.getItem('chatToken') })
                                 .then(() => {
                                     showMessages(localStorage.getItem('chatToken'), userId);
-                                    notification('Повідомлення видалено');
+                                    notification('Повідомлення видалено'); // Використовуйте notification замість console.log
                                 })
                                 .catch((error) => {
-                                    console.error('Помилка при видаленні повідомлення: ' + (error.response ? error.response.data : error.message));
+                                    notification('Помилка при видаленні повідомлення: ' + (error.response ? error.response.data : error.message));
                                 });
-                            return;
+                            return; // Додаємо return, щоб вийти з циклів
                         }
                     }
                 }
             }
-        });
-});
-
-$('.chatContainer').on('dblclick', '.chat', (e) => {
-    let ID = e.currentTarget.id;
-    axios.delete(`/deleteChatFromUser/${ID}`, {
-        data: { userId }
-    })
-        .then((res) => {
-            showChats();
-            notification('Чат видалено');
-            $(`.nameChat`).text(`Main Chat`);
-            localStorage.setItem("chatToken", `mainChat`);
-            $(`.sendMessageForm`).css(`display`, `flex`);
-            $(`.joinChatContainer`).css(`display`, `none`);
-            $(`#users`).removeClass(`numberUsers`);
-            $(`#users`).addClass(`usersOnline`);
-            $(`.usersOnline`).text(`Online ${connectionUser}`);
-            showMainChatMessages(userId);
-        })
-        .catch((error) => {
-            console.log('Помилка при видаленні чату: ' + (error.response ? error.response.data : error.message));
         });
 });
