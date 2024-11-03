@@ -254,22 +254,24 @@ io.on('connection', (socket) => {
         }
 
         try {
+            let newMessageData = { message, userId };
+
             if (chatId === 'mainChat') {
-                await mainChat.create({ message, userId, chatId });
+                await mainChat.create(newMessageData);
             } else {
                 const chat = await Chats.findById(chatId);
                 if (chat) {
-                    chat.messages.push({ message, userId });
+                    chat.messages.push(newMessageData);
                     await chat.save();
                 } else {
                     console.error(`Чат з ID ${chatId} не знайдено`);
-                    socket.emit('error', `Чат з ID ${chatId} не знайдено`);
+                    socket.emit('error', 'Чат не знайдено');
                     return;
                 }
             }
 
-            socket.to(chatId).emit('Other message', { message, userId, chatId });
-            socket.emit('My message', { message, userId, chatId });
+            socket.to(chatId).emit('Other message', newMessageData)
+            socket.emit('My message', newMessageData);
         } catch (error) {
             console.error('Помилка при оновленні чату:', error);
             socket.emit('error', 'Виникла помилка при обробці повідомлення');
@@ -283,23 +285,29 @@ io.on('connection', (socket) => {
     });
 });
 
+
 app.post(`/createMessage`, async (req, res) => {
     const { message, userId, chatId } = req.body;
     if (!message || !userId || !chatId) {
-        return res.status(400).send('Missing message, userId, or chatId');
+        return res.status(400).send('Відсутнє повідомлення, userId або chatId');
     }
     
     try {
-        const chat = await Chats.findById(chatId);
-        if (chat) {
-            const newMessage = { message, userId };
-            chat.messages.push(newMessage);
-            await chat.save();
-            const messageId = chat.messages[chat.messages.length - 1]._id;
-            res.send({ messageId });
+        if (chatId === 'mainChat') {
+            const messageDoc = await mainChat.create({ message, userId, chatId });
+            res.send({ messageId: messageDoc._id });
         } else {
-            console.error(`Чат з ID ${chatId} не знайдено`);
-            res.status(404).send('Чат не знайдено');
+            const chat = await Chats.findById(chatId);
+            if (chat) {
+                const newMessage = { message, userId };
+                chat.messages.push(newMessage);
+                await chat.save();
+                const messageId = chat.messages[chat.messages.length - 1]._id;
+                res.send({ messageId });
+            } else {
+                console.error(`Чат з ID ${chatId} не знайдено`);
+                res.status(404).send('Чат не знайдено');
+            }
         }
     } catch (error) {
         console.error('Помилка при оновленні чату:', error);
@@ -495,18 +503,51 @@ app.put(`/chats/:id`, async (req, res) => {
 
 app.delete(`/deleteChats/:id`, async (req, res) => {
     try {
-        const { chatId } = req.body;
+        const { chatId, userId } = req.body;
         if (!chatId) {
             return res.status(400).send('Missing chatId');
         }
 
-        await Chats.findByIdAndDelete(chatId);
-        res.sendStatus(200);
+        const chat = await Chats.findById(chatId);
+        if (chat.admin === userId) {
+            await Chats.findByIdAndDelete(chatId);
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(403);
+        }
+
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 })
+
+app.delete('/deleteChatFromUser/:id', async (req, res) => {
+    const chatId = req.params.id;
+    const userId = req.body.userId;
+
+    try {
+        const user = await User.findById(userId);
+        if (user) {
+            const chatIndex = user.chats.indexOf(chatId);
+            if (chatIndex > -1) {
+                user.chats.splice(chatIndex, 1);
+                await user.save();
+                const chat = await Chats.findById(chatId);
+                chat.users.splice(chat.users.indexOf(userId), 1);
+                return res.status(200).send('Чат успішно видалено');
+            } else {
+                return res.status(404).send('Чат не знайдено у користувача');
+            }
+        } else {
+            return res.status(404).send('Користувача не знайдено');
+        }
+    } catch (error) {
+        console.error('Помилка при видаленні чату:', error);
+        return res.status(500).send('Внутрішня помилка сервера');
+    }
+});
+
 
 app.post(`/deleteMessages`, async (req, res) => {
     console.log(req.body);
@@ -523,7 +564,6 @@ app.post(`/deleteMessages`, async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-
 
 server.listen(PORT, () => {
     console.log(`listening on ${PORT}`);
