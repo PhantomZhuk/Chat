@@ -318,69 +318,54 @@ socket.on("My message", (data) => {
     axios.get(`/allUsers`)
         .then((res) => {
             const user = res.data.find((el) => el._id === userId);
-            if (user) {
-                axios.post(`/createMessage`, {
-                    message: data.message,
-                    userId: userId,
-                    chatId: localStorage.getItem("chatToken"),
-                })
-                .then((res) => {
-                    const messageId = res.data.messageId; 
-                    const transformedPath = user.path
-                        .replace("public\\", "./")
-                        .replace(/\\/g, "/");
-                    appendMessage(
-                        "myMessage",
-                        nameUser,
-                        data.message,
-                        transformedPath,
-                        localStorage.getItem("chatToken"),
-                        messageId 
-                    );
-                    $(".messageContainer").animate(
-                        { scrollTop: $(".messageContainer").prop("scrollHeight") },
-                        "slow"
-                    );
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-});
+            if (!user) return;
 
+            const transformedPath = user.path.replace("public\\", "./").replace(/\\/g, "/");
+
+            appendMessage(
+                "myMessage",
+                nameUser,
+                data.message,
+                transformedPath,
+                localStorage.getItem("chatToken"),
+                data.messageId 
+            );
+
+            $(".messageContainer").animate(
+                { scrollTop: $(".messageContainer").prop("scrollHeight") },
+                "slow"
+            );
+        })
+        .catch((err) => console.log(err));
+});
 
 socket.on("Other message", (data) => {
     axios.get(`/allUsers`)
         .then((res) => {
             const user = res.data.find((el) => el._id === data.userId);
-            if (user) {
-                const transformedPath = user.path
-                    .replace("public\\", "./")
-                    .replace(/\\/g, "/");
-                getUserNameById(data.userId, (userName) => {
-                    appendMessage(
-                        "otherMessage",
-                        userName,
-                        data.message,
-                        transformedPath,
-                        data.chatId,
-                        data.messageId
-                    );
-                    $(".messageContainer").animate(
-                        { scrollTop: $(".messageContainer").prop("scrollHeight") },
-                        "slow"
-                    );
-                });
-            }
+            if (!user) return;
+
+            const transformedPath = user.path.replace("public\\", "./").replace(/\\/g, "/");
+
+            getUserNameById(data.userId, (userName) => {
+                appendMessage(
+                    "otherMessage",
+                    userName,
+                    data.message,
+                    transformedPath,
+                    data.chatId,
+                    data.messageId
+                );
+
+                $(".messageContainer").animate(
+                    { scrollTop: $(".messageContainer").prop("scrollHeight") },
+                    "slow"
+                );
+            });
         })
-        .catch((err) => {
-            console.log(err);
-        });
+        .catch((err) => console.log(err));
 });
+
 
 
 socket.on("connectionUsers", (connectionUsers) => {

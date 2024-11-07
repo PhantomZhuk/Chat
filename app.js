@@ -255,21 +255,27 @@ io.on('connection', (socket) => {
 
         try {
             if (chatId === 'mainChat') {
-                await mainChat.create({ message, userId, chatId });
+                const newMessage = await mainChat.create({ message, userId, chatId });
+                const messageId = newMessage._id;
+
+                socket.to(chatId).emit('Other message', { message, userId, chatId, messageId });
+                socket.emit('My message', { message, userId, chatId, messageId });
             } else {
                 const chat = await Chats.findById(chatId);
                 if (chat) {
-                    chat.messages.push({ message, userId });
+                    const newMessage = { message, userId };
+                    chat.messages.push(newMessage);
                     await chat.save();
+
+                    const messageId = chat.messages[chat.messages.length - 1]._id;
+
+                    socket.to(chatId).emit('Other message', { message, userId, chatId, messageId });
+                    socket.emit('My message', { message, userId, chatId, messageId });
                 } else {
                     console.error(`Чат з ID ${chatId} не знайдено`);
                     socket.emit('error', `Чат з ID ${chatId} не знайдено`);
-                    return;
                 }
             }
-
-            socket.to(chatId).emit('Other message', { message, userId, chatId });
-            socket.emit('My message', { message, userId, chatId });
         } catch (error) {
             console.error('Помилка при оновленні чату:', error);
             socket.emit('error', 'Виникла помилка при обробці повідомлення');
@@ -281,30 +287,6 @@ io.on('connection', (socket) => {
         connectionUsers--;
         io.emit('connectionUsers', connectionUsers);
     });
-});
-
-app.post(`/createMessage`, async (req, res) => {
-    const { message, userId, chatId } = req.body;
-    if (!message || !userId || !chatId) {
-        return res.status(400).send('Missing message, userId, or chatId');
-    }
-    
-    try {
-        const chat = await Chats.findById(chatId);
-        if (chat) {
-            const newMessage = { message, userId };
-            chat.messages.push(newMessage);
-            await chat.save();
-            const messageId = chat.messages[chat.messages.length - 1]._id;
-            res.send({ messageId });
-        } else {
-            console.error(`Чат з ID ${chatId} не знайдено`);
-            res.status(404).send('Чат не знайдено');
-        }
-    } catch (error) {
-        console.error('Помилка при оновленні чату:', error);
-        res.status(500).send('Внутрішня помилка сервера');
-    }
 });
 
 
