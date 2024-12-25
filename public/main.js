@@ -200,7 +200,7 @@ function showProfile(userId) {
             const user = res.data.find((el) => el._id === userId);
             if (user) {
                 const transformedPath = user.path
-                    .replace("public\\", "./")
+                    .replace("public\\", "/")
                     .replace(/\\/g, "/");
 
                 $("#profileImg").css("background-image", `url(${transformedPath})`);
