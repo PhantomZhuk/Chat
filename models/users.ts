@@ -4,10 +4,8 @@ const userSchema = new mongoose.Schema({
     login: String,
     email: String,
     password: String,
-    filename: String,
-    path: String,
-    uploadDate: { type: Date, default: Date.now },
+    iconFilename: String,
     chats: [String]
 })
 
-export const User = mongoose.model("User", userSchema);
+export const Users = mongoose.model("Users", userSchema);

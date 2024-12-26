@@ -15,7 +15,5 @@ const upload = multer({ storage: storage });
 
 const router = express
     .Router()
-    .post(`/changeName/:id`, controllers.changeName)
-    .post(`/uploadUserIcon`, upload.single('file'), controllers.uploadUserIcon)
 
 export default router;

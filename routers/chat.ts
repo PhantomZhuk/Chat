@@ -15,14 +15,5 @@ const upload = multer({ storage: storage });
 
 const router = express
     .Router()
-    .get(`/mainChatMessages`, controllers.mainChatMessages)
-    .get(`/allChats`, controllers.Allchats)
-    .post(`/createChat`, upload.single('file'), controllers.createChat)
-    .post(`/addChatToUser`, controllers.addChatToUser)
-    .delete(`/deleteChata`, controllers.deleteChats)
-    .put(`/changeChat`, controllers.changeChat)
-    .post(`/addChatToUser`, controllers.addChatToUser)
-    .post(`/deleteMessages`, controllers.deleteMessages)
-    .post(`/createUserChat`, controllers.createUserChat);
 
 export default router;

@@ -2,9 +2,7 @@ import mongoose from "mongoose";
 
 const chatShema = new mongoose.Schema({
     nameChat: String,
-    filename: String,
-    path: String,
-    uploadDate: { type: Date, default: Date.now },
+    iconFilename: String,
     admin: String,
     chatType: String,
     users: [String],

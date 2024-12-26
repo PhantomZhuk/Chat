@@ -3,7 +3,7 @@ let userId = $.cookie("userToken");
 let nameUser;
 let connectionUser;
 axios
-    .get("/allUsers")
+    .get("/auth/allUsers")
     .then((res) => {
         const user = res.data.find((el) => el._id === userId);
         if (user) {
@@ -176,7 +176,7 @@ function handleFile(file, userId) {
     formData.append("userId", userId);
 
     axios
-        .post("/uploadUserIcon", formData, {
+        .post("/user/uploadUserIcon", formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
@@ -195,7 +195,7 @@ function handleFile(file, userId) {
 
 function showProfile(userId) {
     axios
-        .get(`/allUsers`)
+        .get(`/auth/allUsers`)
         .then((res) => {
             const user = res.data.find((el) => el._id === userId);
             if (user) {
@@ -219,7 +219,7 @@ showProfile(userId);
 
 $(`#changeNameBtn`).click(() => {
     axios
-        .put(`/chageName/${userId}`, {
+        .put(`/user/chageName/${userId}`, {
             login: $("#changeNameInput").val(),
         })
         .then((res) => {
@@ -315,7 +315,7 @@ $(".sendMessageContainer").on("submit", (e) => {
 });
 
 socket.on("My message", (data) => {
-    axios.get(`/allUsers`)
+    axios.get(`/auth/allUsers`)
         .then((res) => {
             const user = res.data.find((el) => el._id === userId);
             if (!user) return;
@@ -340,7 +340,7 @@ socket.on("My message", (data) => {
 });
 
 socket.on("Other message", (data) => {
-    axios.get(`/allUsers`)
+    axios.get(`/auth/allUsers`)
         .then((res) => {
             const user = res.data.find((el) => el._id === data.userId);
             if (!user) return;
@@ -383,7 +383,7 @@ function checkAuthorisation() {
     }
 
     axios
-        .get(`/protected`, {
+        .get(`/auth/protected`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -395,7 +395,7 @@ function checkAuthorisation() {
         })
         .catch((err) => {
             axios
-                .get(`/refresh`, {
+                .get(`/auth/refresh`, {
                     headers: {
                         "refresh-token": `Bearer ${refreshToken}`,
                     },
@@ -420,7 +420,7 @@ checkAuthorisation();
 
 function getUserNameById(id, callback) {
     axios
-        .get("/allUsers")
+        .get("/auth/allUsers")
         .then((res) => {
             const user = res.data.find((el) => el._id === id);
             if (user) {
@@ -449,10 +449,10 @@ function appendMessage(type, userName, message, photoUrl, chatId, messageId) {
 }
 
 function showMainChatMessages(userId) {
-    axios.get(`/mainChatMessages`)
+    axios.get(`/chat/mainChatMessages`)
         .then((messageRes) => {
             axios
-                .get(`/allUsers`)
+                .get(`/auth/allUsers`)
                 .then((userRes) => {
                     const users = userRes.data;
                     $(`.messageContainer`).empty();
@@ -516,7 +516,7 @@ function createChat(nameChat, userId, chatType, file) {
     if (file) formData.append("file", file);
 
     axios
-        .post(`/createChat`, formData, {
+        .post(`/chat/createChat`, formData, {
             headers: { "Content-Type": "multipart/form-data" },
         })
         .then((res) => {
@@ -558,7 +558,7 @@ $(`#makeChatPrivateBtn`).click(() => {
 
 
 $(`#addChatBtn`).click(() => {
-    axios.get(`/AllChats`)
+    axios.get(`/user/AllChats`)
         .then((res) => {
             let chatCreated = false;
             if (Array.isArray(res.data)) {
@@ -577,14 +577,14 @@ $(`#addChatBtn`).click(() => {
 });
 
 function showChats() {
-    axios.get(`allUsers`)
+    axios.get(`/auth/allUsers`)
         .then((res) => {
             $(`.chatContainer`).empty();
             for (let user of res.data) {
                 if (user._id == userId) {
                     for (let chat of user.chats) {
                         let chatId = chat;
-                        axios.get(`/Allchats`).then((res) => {
+                        axios.get(`/chat/Allchats`).then((res) => {
                             for (let chat of res.data) {
                                 if (chat._id === chatId) {
                                     if (chat.nameChat.includes(",")) {
@@ -631,12 +631,12 @@ showChats();
 
 function showMessages(chatId, userId) {
     $(".messageContainer").empty();
-    axios.get(`/Allchats`)
+    axios.get(`/chat/Allchats`)
         .then((res) => {
             for (let chat of res.data) {
                 if (chat._id === chatId) {
                     for (let message of chat.messages) {
-                        axios.get(`/allUsers`)
+                        axios.get(`/auth/allUsers`)
                             .then((res) => {
                                 const user = res.data.find((el) => el._id === (message.userId === userId ? userId : message.userId));
                                 if (user) {
@@ -659,7 +659,7 @@ function showMessages(chatId, userId) {
 
 $(`.chatContainer`).on(`click`, `.chat`, (e) => {
     let ID = e.target.id;
-    axios.get(`/Allchats`).then((res) => {
+    axios.get(`/chat/Allchats`).then((res) => {
         for (let chat of res.data) {
             if (chat._id === ID) {
                 $(`.nameChat`).text(`${chat.nameChat}`);
@@ -691,7 +691,7 @@ $(`#searchInput`).on(`input`, () => {
     if ($(`#searchInput`).val().length > 0) {
         $(`.searchChatContainer`).css(`display`, `flex`);
         $(`.mainChatContainer`).css(`display`, `none`);
-        axios.get(`/Allchats`).then((res) => {
+        axios.get(`/chat/Allchats`).then((res) => {
             $(`.searchChatContainer`).empty();
             for (let chat of res.data) {
                 if (chat.nameChat.toLowerCase().includes($(`#searchInput`).val().toLowerCase())) {
@@ -723,7 +723,7 @@ $(`#searchInput`).on(`input`, () => {
 
 $(`.searchChatContainer`).on(`click`, `.searchChat`, (e) => {
     let ID = e.target.id;
-    axios.get(`/Allchats`).then((res) => {
+    axios.get(`/chat/Allchats`).then((res) => {
         let chatFound = false;
         for (let chat of res.data) {
             if (chat._id === ID) {
@@ -783,13 +783,13 @@ $(`#joinChatBtn`).click(() => {
 
 $('.messageContainer').on('click', '.message', (e) => {
     let ID = e.currentTarget.id;
-    axios.get('/Allchats')
+    axios.get('/chat/Allchats')
         .then((res) => {
             for (let chat of res.data) {
                 if (chat._id === localStorage.getItem('chatToken')) {
                     for (let message of chat.messages) {
                         if (message._id === ID) {
-                            axios.post(`/deleteMessages`, { messageId: ID, chatId: localStorage.getItem('chatToken') })
+                            axios.post(`/chat/deleteMessages`, { messageId: ID, chatId: localStorage.getItem('chatToken') })
                                 .then(() => {
                                     showMessages(localStorage.getItem('chatToken'), userId);
                                     notification('Повідомлення видалено'); // Використовуйте notification замість console.log
