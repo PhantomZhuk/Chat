@@ -1,20 +1,4 @@
 const socket = io();
-let userId = $.cookie("userToken");
-let nameUser;
-let connectionUser;
-axios
-    .get("/auth/allUsers")
-    .then((res) => {
-        const user = res.data.find((el) => el._id === userId);
-        if (user) {
-            nameUser = user.login;
-        } else {
-            console.log("User not found for ID:", userId);
-        }
-    })
-    .catch((err) => {
-        console.log("Error fetching users:", err);
-    });
 
 $(`#MenuBtn`).click(() => {
     if ($(`#MenuBtn`).hasClass(`fa-bars`)) {
@@ -235,10 +219,6 @@ $(`#changeNameBtn`).click(() => {
         });
 });
 
-$(`.signOutBtn`).click(() => {
-    $.removeCookie("userToken");
-    window.location.href = "/";
-});
 
 $(`.addChatBtn`).click(() => {
     $(`.addChatContainer`).css(`display`, `flex`);
@@ -374,46 +354,13 @@ socket.on("connectionUsers", (connectionUsers) => {
 });
 
 function checkAuthorisation() {
-    const token = localStorage.getItem("token");
-    const refreshToken = localStorage.getItem("refreshToken");
-
-    if (!token || !refreshToken) {
-        window.location.href = "/auth";
-        return;
-    }
-
-    axios
-        .get(`/auth/protected`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-        .then((res) => {
-            if (window.location.pathname !== "/chats") {
-                window.location.href = "/chats";
-            }
-        })
-        .catch((err) => {
-            axios
-                .get(`/auth/refresh`, {
-                    headers: {
-                        "refresh-token": `Bearer ${refreshToken}`,
-                    },
-                })
-                .then((res) => {
-                    localStorage.setItem("token", res.data.token);
-
-                    if (window.location.pathname !== "/chats") {
-                        window.location.href = "/chats";
-                    }
-                })
-                .catch((err) => {
-                    console.log(err);
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("refreshToken");
-                    window.location.href = "/auth";
-                });
-        });
+    axios.get("/users/getUserInfo")
+    .then((res) => {
+        console.log(res);
+    })
+    .catch((err) => {
+        console.log(err);
+    })
 }
 
 checkAuthorisation();
