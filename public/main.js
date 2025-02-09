@@ -143,31 +143,26 @@ $(`.drag-and-drop`).on("drop", (e) => {
     e.preventDefault();
 
     const file = e.originalEvent.dataTransfer.files[0];
-    handleFile(file, userId);
+    handleFile(file);
 });
 
 $(`#changeProfileImgInput`).on("change", function () {
     const file = this.files[0];
     if (file) {
         console.log(file);
-        handleFile(file, userId);
+        handleFile(file);
     }
 });
 
-function handleFile(file, userId) {
+function handleFile(file) {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("userId", userId);
 
     axios
-        .post("/user/uploadUserIcon", formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        })
+        .post("/users/uploadUserIcon", formData)
         .then((res) => {
             console.log(res);
-            showProfile(userId);
+            showProfile();
             $(`.changeProfileImgContainer`).css(`display`, `none`);
             $(`.profileContainer`).css(`display`, `flex`);
             notification(`Profile image changed`);
@@ -177,38 +172,35 @@ function handleFile(file, userId) {
         });
 }
 
-function showProfile(userId) {
+function showProfile() {
     axios
-        .get(`/auth/allUsers`)
+        .get(`/users/getUserInfo`)
         .then((res) => {
-            const user = res.data.find((el) => el._id === userId);
-            if (user) {
-                const transformedPath = user.path
-                    .replace("public\\", "/")
-                    .replace(/\\/g, "/");
+            // const transformedPath = res.data.
+            //     .replace("public\\", "/")
+            //     .replace(/\\/g, "/");
 
-                $("#profileImg").css("background-image", `url(${transformedPath})`);
-                $("#accountIcon").css("background-image", `url(${transformedPath})`);
-                $(".profileName").text(user.login);
-                $(".accountName").text(user.login);
-                showMainChatMessages(userId);
-            }
+            $("#profileImg").css("background-image", `url(${res.data.photo})`);
+            $("#accountIcon").css("background-image", `url(${res.data.photo})`);
+            $(".profileName").text(res.data.login);
+            $(".accountName").text(res.data.login);
+            showMainChatMessages();
         })
         .catch((err) => {
             console.log(err);
         });
 }
 
-showProfile(userId);
+showProfile();
 
 $(`#changeNameBtn`).click(() => {
     axios
-        .put(`/user/chageName/${userId}`, {
+        .post(`/users/updateUserName`, {
             login: $("#changeNameInput").val(),
         })
         .then((res) => {
             console.log(res);
-            showProfile(userId);
+            showProfile();
             $(`.changeNameContainer`).css(`display`, `none`);
             $(`.profileContainer`).css(`display`, `flex`);
             $("#changeNameInput").val(``);
@@ -308,7 +300,7 @@ socket.on("My message", (data) => {
                 data.message,
                 transformedPath,
                 localStorage.getItem("chatToken"),
-                data.messageId 
+                data.messageId
             );
 
             $(".messageContainer").animate(
@@ -355,12 +347,12 @@ socket.on("connectionUsers", (connectionUsers) => {
 
 function checkAuthorisation() {
     axios.get("/users/getUserInfo")
-    .then((res) => {
-        console.log(res);
-    })
-    .catch((err) => {
-        console.log(err);
-    })
+        .then((res) => {
+            console.log(res);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
 }
 
 checkAuthorisation();
@@ -444,7 +436,7 @@ function showMainChatMessages(userId) {
         .catch((err) => console.log(err));
 }
 
-showMainChatMessages(userId);
+// showMainChatMessages(userId);
 
 function notification(notification) {
     $(`.notificationContainer`).css("display", "flex");

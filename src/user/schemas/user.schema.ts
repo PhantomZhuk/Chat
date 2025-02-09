@@ -12,7 +12,7 @@ export class User extends Document {
     @Prop({ required: true })
     email: string;
 
-    @Prop({ required: true, default: 'none' })
+    @Prop({ required: true, default: './uploads/default.webp' })
     photo: string;
 
     @Prop({ required: true })

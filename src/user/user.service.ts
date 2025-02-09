@@ -63,4 +63,29 @@ export class UserService {
     }
     return user;
   }
+
+  async saveFileToDatabase (file: Express.Multer.File, login: string): Promise<User> {
+    const user = await this.userModel.findOne({ login }).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const photo = `./uploads/${file.filename}`;
+    user.photo = photo;
+    return user.save();
+  }
+
+  async updateUserName(login: string, oldLogin: string): Promise<User> {
+    console.log(login, oldLogin);
+    const user = await this.userModel.findOne({ login: oldLogin }).exec();
+    const allUsers = await this.userModel.find().exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (allUsers.find(el => el.login === login)) {
+      throw new Error('User with this login already exists');
+    }
+    user.login = login;
+    return user.save();
+  }
 }
