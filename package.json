@@ -26,9 +26,9 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/mongoose": "^11.0.1",
     "@nestjs/platform-express": "^11.0.8",
-    "@nestjs/platform-socket.io": "^11.0.8",
+    "@nestjs/platform-socket.io": "^11.0.9",
     "@nestjs/serve-static": "^5.0.2",
-    "@nestjs/websockets": "^11.0.8",
+    "@nestjs/websockets": "^11.0.9",
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
@@ -45,6 +45,8 @@
     "nodemailer": "^6.10.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "uuid": "^11.0.5"
   },
   "devDependencies": {

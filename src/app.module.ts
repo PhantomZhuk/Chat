@@ -6,6 +6,7 @@ import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
+import { MessageModule } from './message/message.module';
 import { ChatModule } from './chat/chat.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { ChatModule } from './chat/chat.module';
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGODB_URI!),
     UserModule,
+    MessageModule,
     ChatModule,
   ],
   controllers: [AppController],
